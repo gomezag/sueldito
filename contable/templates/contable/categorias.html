@@ -1,0 +1,36 @@
+{% extends 'navbar.html' %}
+
+{% block content %}
+
+
+<div class="container">
+
+    <h1 class="title"> Categorias </h1>
+    <div class="content">
+    {% for cat in categorias %}
+        <div class="card">
+            <div class="media-content">
+                <p class="title is-4"><a  href="view/categoria/{{cat.id}}">{{cat.name}}</a></p>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+<div class="container">
+
+<form action="/categorias" method="post">
+    {% csrf_token %}
+    <div class="field">
+        <label class="label">Name: </label>
+        <input type="text" name="name" />
+    </div>
+    <div class="field">
+        <label class="label">Key: </label>
+        <input type="text" name="key" />
+    </div>
+    <div class="field">
+       <input type="submit" value="Submit" class="button">
+    </div>
+</form>
+</div>
+{% endblock %}

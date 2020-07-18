@@ -1,0 +1,87 @@
+{% extends 'navbar.html' %}
+{% load macros %}
+{% macro options name%}
+    <div class="select">
+        <select name="{{name}}">
+            {% for column in columns %}
+                <option> {{column}} </option>
+            {% endfor %}
+        </select>
+    </div>
+{% endmacro %}
+
+{% block content %}
+
+<div class="container">
+    <form action="/import/import_file" method="post">
+        {% csrf_token %}
+        <h1 class="title"> Ticket </h1>
+        <div class="field is-grouped">
+            <label class="label">Fecha</label>
+            {% use_macro options "fecha" %}
+            <input type="text" name="date_format" value="%d/%m/%Y"/>
+        </div>
+        <div class="field is-grouped">
+            <label class="label">Importe</label>
+            {% use_macro options "importe" %}
+        </div>
+        <div class="field is-grouped">
+            <label class="label">Concepto</label>
+            {% use_macro options "concepto" %}
+        </div>
+        <div class="field is-grouped">
+            <label class="label">Modo</label>
+            {% use_macro options "modo" %}
+        </div>
+        <div class="field is-grouped">
+            <label class="label">Cuenta</label>
+            <div class="select">
+                <select name="cuenta">
+                {% for cuenta in cuentas %}
+                    <option> {{cuenta}} </option>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="field is-grouped">
+            <label class="label">Moneda</label>
+            <div class="select">
+                <select name="moneda">
+                {% for moneda in monedas %}
+                    <option> {{moneda}} </option>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
+        <input type="hidden" name="data" value="{{jdata}}" />
+       <input type="submit" value="Submit" class="button">
+        <div class="tile is-ancestor">
+            <div class="tile is-parent">
+
+            {% for k, list in data.items %}
+                <div class="tile is-child">
+                    <table class="table">
+                        <thead>
+                            <th>
+                                {{k}}
+                            </th>
+                        </thead>
+                        <tbody>
+                        {% for item in list.items %}
+                            <tr>
+                                <td>
+                                {{item.1}}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endfor %}
+
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

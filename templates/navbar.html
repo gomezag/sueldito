@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block navbar %}
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <h2 class="navbar-item">
+      Sueldito App
+    </h2>
+
+    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarBasicExample" class="navbar-menu">
+    <div class="navbar-start">
+      <a class="navbar-item" href="{% url 'home' %}">
+        Home
+      </a>
+
+
+      <a class="navbar-item" href="{% url 'import' %}">
+        Import
+      </a>
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="{% url 'cuentas' %}">
+            Cuentas
+          </a>
+          <a class="navbar-item" href="{% url 'categorias' %}">
+            Categorias
+          </a>
+          <a class="navbar-item" href="{% url 'modos_transferencia' %}">
+            Modos de Transferencia
+          </a>
+          <a class="navbar-item" href="{% url 'monedas' %}">
+            Monedas
+          </a>
+          <hr class="navbar-divider">
+          <a class="navbar-item">
+            Report an issue
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <h2 class="subtitle">
+          {% if user.is_authenticated %}
+            Hi {{ user.username }}!
+          {% else %}
+            <p>You are not logged in</p>
+          {% endif %}
+        </h2>
+      </div>
+      <div class="navbar-item">
+        <div class="buttons">
+            {% if user.is_authenticated %}
+              <a class="button is-light" href="{% url 'logout' %}">
+                Log out
+              </a>
+            {% else %}
+              <a class="button is-light" href="{% url 'login' %}">
+                Log in
+              </a>
+            {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+{% endblock %}

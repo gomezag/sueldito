@@ -1,0 +1,28 @@
+{% extends 'navbar.html' %}
+
+{% block content %}
+
+
+<div class="container">
+
+    <h1 class="title"> Modos de Transferencia </h1>
+    <div class="list is-hoverable">
+    {% for modo in modos %}
+        <a class="list-item">
+            {{modo}}
+        </a>
+    {% endfor %}
+    </div>
+</div>
+<div class="container">
+
+<form action="/modos_transferencia" method="post">
+    {% csrf_token %}
+    <div class="field is-grouped">
+        <input type="text" name="name" />
+        <input type="text" name="key" />
+       <input type="submit" value="Submit" class="button">
+    </div>
+</form>
+</div>
+{% endblock %}

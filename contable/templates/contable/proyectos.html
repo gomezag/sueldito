@@ -1,0 +1,27 @@
+{% extends 'navbar.html' %}
+
+{% block content %}
+
+
+<div class="container">
+
+    <h1 class="title"> Proyectos </h1>
+    <div class="list is-hoverable">
+    {% for proyecto in proyectos %}
+        <a class="list-item">
+            {{proyecto}}
+        </a>
+    {% endfor %}
+    </div>
+</div>
+<div class="container">
+
+<form action="/proyectos" method="post">
+    {% csrf_token %}
+    <div class="field is-grouped">
+        <input type="text" name="name" />
+       <input type="submit" value="Submit" class="button">
+    </div>
+</form>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'navbar.html' %}
+
+{%load plotly_dash%}
+{% block content %}
+
+
+<div class="container">
+    {%plotly_app name="BalanceHistorial" ratio=0.4 %}
+    <h1 class="title"> {{categoria.name}} </h1>
+    <form action="/import/categorize" method="post">
+        {% csrf_token %}
+        <div class="field is-grouped">
+            <div class="select">
+                <select name="categoria">
+                    <option> N/A </option>
+                    {% for cat in categorias %}
+                        <option> {{cat}} </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <input type="hidden" name="cat" value="{{categoria}}" />
+
+            <input type="submit" value="Categorize" />
+        </div>
+        <table class="table">
+            <thead>
+                <th>
+                    Fecha
+                </th>
+
+                <th>
+                    Concepto
+                </th>
+
+                <th>
+                    Importe
+                </th>
+
+                <th>
+                    Moneda
+                </th>
+                <th>
+                    Categoria
+                </th>
+                <th>
+                    Select
+                </th>
+                <th>
+                    Match All
+                </th>
+            </thead>
+            <tbody>
+            {% for ticket  in tickets %}
+                <tr>
+                    <td>
+                        {{ticket.fecha}}
+                    </td>
+                    <td>
+                        {{ticket.concepto}}
+                    </td>
+                    <td>
+                        {{ticket.importe}}
+                    </td>
+                    <td>
+                        {{ticket.moneda.name}}
+                    </td>
+                    <td>
+                        {{ticket.categoria.name}}
+                    </td>
+                    <td>
+                        <input type="checkbox" id="tickets-{{ticket.id}}" name="tickets" value="{{ticket.id}}" />
+                    </td>
+                    <td>
+                        <input type="checkbox" id="match-{{ticket.id}}" name="matchs" value="{{ticket.id}}" />
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
+</div>
+{% endblock %}

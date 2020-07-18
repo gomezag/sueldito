@@ -1,0 +1,34 @@
+{% extends 'navbar.html' %}
+{% load macros %}
+
+{% block content %}
+
+<div class="container">
+    Import Page!
+    <form action="/import/parse_file" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+        <div class="file">
+          <label class="file-label">
+            <input class="file-input" type="file" name="file" id="file-input">
+            <span class="file-cta">
+              <span class="file-icon">
+                <i class="fas fa-upload"></i>
+              </span>
+              <span class="file-label">
+                Choose a file…
+              </span>
+            </span>
+          </label>
+        </div>
+        <p id="selected-file"></p>
+       <input type="submit" value="Submit" class="button">
+    </form>
+</div>
+
+<script>
+document.getElementById('file-input').onchange = function () {
+  document.getElementById('selected-file').innerHTML='Selected file: ' + this.value;
+};
+</script>
+
+{% endblock %}
