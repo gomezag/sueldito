@@ -2,7 +2,6 @@
 
 static/
 import_data/
-.idea/
 # Django #
 *.log
 *.pot
