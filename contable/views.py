@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 
-from reports.dashapps import HistorialBalance
+# from reports.dashapps import HistorialBalance
 
 from .serializers import *
 from .forms import *
@@ -32,8 +32,11 @@ def categorias(request):
 @require_http_methods(["GET", "POST"])
 @login_required(login_url='/accounts/login')
 def cuentas(request):
-    tickets = Ticket.objects.all().order_by('fecha')
-    HistorialBalance(tickets, convert=True)
+    session = request.session
+    bargraph_state = session.get('django_plotly_dash', {})
+    bargraph_state['cuenta'] = 'all'
+    session['django_plotly_dash'] = bargraph_state
+
     if request.method == 'POST':
         cuenta = Cuenta()
         cuenta.name = request.POST['name']

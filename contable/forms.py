@@ -17,3 +17,9 @@ class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Cuenta
         fields = "__all__"
+
+
+class TicketForm(forms.ModelForm):
+    class Meta:
+        model = Ticket
+        fields = "__all__"

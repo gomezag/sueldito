@@ -2,12 +2,12 @@ from django.db import models
 from django.db.models import Sum
 from django.db.models.signals import post_save
 from django.utils.functional import cached_property
-
+from colorfield.fields import ColorField
 # Create your models here.
 
 class Categoria(models.Model):
     name = models.CharField(max_length=200)
-    color = models.CharField(max_length=10, null=True, blank=True)
+    color = ColorField(default='#FF0000', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -63,7 +63,7 @@ class Ticket(models.Model):
     cuenta = models.ForeignKey(Cuenta, on_delete=models.CASCADE)
     importe = models.FloatField('importe')
     moneda = models.ForeignKey(Moneda, on_delete=models.SET_NULL, null=True, blank=True)
-    tipo = models.ForeignKey(ModoTransferencia, on_delete=models.SET_NULL, null=True, blank=True)
+    modo = models.ForeignKey(ModoTransferencia, on_delete=models.SET_NULL, null=True, blank=True)
     concepto = models.CharField(max_length=200)
     categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT, null=False, blank=False)
     consistency = models.BooleanField(default=False)
