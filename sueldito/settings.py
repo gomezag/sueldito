@@ -51,7 +51,9 @@ INSTALLED_APPS = [
     'import',
     'reports',
 
+    'colorfield',
     'django_plotly_dash.apps.DjangoPlotlyDashConfig',
+
 ]
 
 MIDDLEWARE = [
@@ -150,10 +152,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = 'https://static.agustingomez.me/mqttdash/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
 ]
+STATIC_ROOT='static/'
+STATIC_URL = 'https://static.agustingomez.me/sueldito/'
 
 # config/settings.py
 LOGIN_REDIRECT_URL = 'home'

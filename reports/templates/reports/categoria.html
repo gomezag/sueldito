@@ -22,61 +22,45 @@
 
             <input type="submit" value="Categorize" />
         </div>
-        <table class="table">
+        <nav class="pagination is-small" role="navigation" aria-label="pagination">
+          <a class="pagination-previous" onclick="prevPage();">Previous</a>
+            <div id="page-list">
+
+            </div>
+          <a class="pagination-next" onclick="nextPage();">Next page</a>
+        </nav>
+        <table class="table" width="100%">
             <thead>
-                <th>
+                <th width="10">
                     Fecha
                 </th>
 
-                <th>
+                <th width="53%">
                     Concepto
                 </th>
 
-                <th>
+                <th width="7%">
                     Importe
                 </th>
 
-                <th>
+                <th width="5%">
                     Moneda
                 </th>
-                <th>
+                <th width="15%">
                     Categoria
                 </th>
-                <th>
+                <th width="15%">
                     Select
                 </th>
-                <th>
+                <th width="5%">
                     Match All
                 </th>
             </thead>
-            <tbody>
-            {% for ticket  in tickets %}
-                <tr>
-                    <td>
-                        {{ticket.fecha}}
-                    </td>
-                    <td>
-                        {{ticket.concepto}}
-                    </td>
-                    <td>
-                        {{ticket.importe}}
-                    </td>
-                    <td>
-                        {{ticket.moneda.name}}
-                    </td>
-                    <td>
-                        {{ticket.categoria.name}}
-                    </td>
-                    <td>
-                        <input type="checkbox" id="tickets-{{ticket.id}}" name="tickets" value="{{ticket.id}}" />
-                    </td>
-                    <td>
-                        <input type="checkbox" id="match-{{ticket.id}}" name="matchs" value="{{ticket.id}}" />
-                    </td>
-                </tr>
-            {% endfor %}
+            <tbody id="table-data">
+
             </tbody>
         </table>
     </form>
 </div>
+{% include 'reports/get_tickets.html' %}
 {% endblock %}

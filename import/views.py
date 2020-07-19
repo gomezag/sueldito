@@ -50,7 +50,7 @@ def import_file(request):
         if type(importe) == str:
             importe = float(importe.replace(',', '.'))
         ticket.importe = importe
-        ticket.tipo = ModoTransferencia.objects.get(name=df[request.POST['modo']][i])
+        ticket.modo = ModoTransferencia.objects.get(name=df[request.POST['modo']][i])
         ticket.fecha = datetime.datetime.strptime(df[request.POST['fecha']][i], request.POST['date_format']).date()
         ticket.moneda = moneda
         ticket.cuenta = cuenta

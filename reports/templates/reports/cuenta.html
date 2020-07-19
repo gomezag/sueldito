@@ -9,20 +9,14 @@
         {%plotly_app name="BalanceHistorial" ratio=0.7%}
     </div>
     <h1 class="title"> {{cuenta}} </h1>
-    <form action="/import/categorize" method="post">
-        {% csrf_token %}
-        <div class="field is-grouped">
-            <div class="select">
-                <select name="categoria">
-                    {% for cat in categorias %}
-                        <option> {{cat}} </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <input type="hidden" name="cuenta" value="{{cuenta}}" />
 
-            <input type="submit" value="Categorize" />
-        </div>
+        <nav class="pagination is-small" role="navigation" aria-label="pagination">
+          <a class="pagination-previous" onclick="prevPage();">Previous</a>
+            <div id="page-list">
+
+            </div>
+          <a class="pagination-next" onclick="nextPage();">Next page</a>
+        </nav>
         <table class="table">
             <thead>
                 <th>
@@ -52,37 +46,11 @@
                     Match All
                 </th>
             </thead>
-            <tbody>
-            {% for ticket  in tickets %}
-                <tr>
-                    <td>
-                        {{ticket.fecha}}
-                    </td>
-                    <td>
-                        {{ticket.concepto}}
-                    </td>
-                    <td>
-                        {{ticket.importe}}
-                    </td>
-                    <td>
-                        {{ticket.saldo}}
-                    </td>
-                    <td>
-                        {{ticket.moneda.name}}
-                    </td>
-                    <td>
-                        {{ticket.categoria.name}}
-                    </td>
-                    <td>
-                        <input type="checkbox" id="tickets-{{ticket.id}}" name="tickets" value="{{ticket.id}}" />
-                    </td>
-                    <td>
-                        <input type="checkbox" id="match-{{ticket.id}}" name="matchs" value="{{ticket.id}}" />
-                    </td>
-                </tr>
-            {% endfor %}
+            <tbody id="table-data">
+
             </tbody>
         </table>
-    </form>
 </div>
+
+{% include 'reports/get_tickets.html' %}
 {% endblock %}
