@@ -4,7 +4,11 @@
     <div class="select">
         <select name="{{name}}">
             {% for column in columns %}
-                <option> {{column}} </option>
+                {% if column.lower == name.lower %}
+                    <option selected > {{column}} </option>
+                {% else %}
+                    <option> {{column}} </option>
+                {% endif %}
             {% endfor %}
         </select>
     </div>

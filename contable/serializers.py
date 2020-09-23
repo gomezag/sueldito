@@ -9,13 +9,20 @@ class MonedaSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class ProyectoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Proyecto
+        fields = '__all__'
+
+
 class CuentaSerializer(serializers.ModelSerializer):
     # balance = serializers.ReadOnlyField()
     balance = serializers.SerializerMethodField()
     moneda = MonedaSerializer()
 
     def get_balance(self, obj):
-        return "{:,.2f}".format(obj.balance)
+        return obj.balance
 
     class Meta:
         model = Cuenta
@@ -34,6 +41,7 @@ class TicketSerializer(serializers.ModelSerializer):
     moneda = MonedaSerializer()
     categoria = CategoriaSerializer()
     saldo = serializers.SerializerMethodField()
+    proyecto = ProyectoSerializer()
 
     def get_saldo(self, obj):
         return "{:,.2f}".format(obj.saldo)

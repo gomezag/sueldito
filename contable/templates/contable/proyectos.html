@@ -8,8 +8,8 @@
     <h1 class="title"> Proyectos </h1>
     <div class="list is-hoverable">
     {% for proyecto in proyectos %}
-        <a class="list-item">
-            {{proyecto}}
+        <a class="list-item" href="view/proyecto/{{proyecto.id}}">
+            {{proyecto.name}}
         </a>
     {% endfor %}
     </div>
@@ -18,8 +18,8 @@
 
 <form action="/proyectos" method="post">
     {% csrf_token %}
-    <div class="field is-grouped">
-        <input type="text" name="name" />
+    {{form}}
+    <div class="field">
        <input type="submit" value="Submit" class="button">
     </div>
 </form>

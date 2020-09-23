@@ -23,3 +23,9 @@ class TicketForm(forms.ModelForm):
     class Meta:
         model = Ticket
         fields = "__all__"
+
+
+class ProyectoForm(forms.ModelForm):
+    class Meta:
+        model = Proyecto
+        fields = ['name']

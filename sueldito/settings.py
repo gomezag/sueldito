@@ -53,7 +53,8 @@ INSTALLED_APPS = [
 
     'colorfield',
     'django_plotly_dash.apps.DjangoPlotlyDashConfig',
-
+    'mathfilters',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [

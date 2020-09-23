@@ -10,14 +10,29 @@
     {% for cat in categorias %}
         <div class="card">
             <div class="media-content">
-                <p class="title is-4"><a  href="view/categoria/{{cat.id}}">{{cat.name}}</a></p>
+              <div class="title">
+                <p class="title is-4">
+                    <a  href="view/categoria/{{cat.id}}">{{cat.name}}</a>
+                    <span class="icon" onclick="editCat('{{cat.id}}', '{{cat.name}}');">
+                        <icon class="fa fa-edit"></icon>
+                    </span>
+                    <span class="icon" onclick="delCat('{{cat.id}}');">
+                        <icon class="fa fa-trash"></icon>
+                    </span>
+                </p>
+                </div>
             </div>
         </div>
     {% endfor %}
     </div>
 </div>
+
 <div class="container">
 
+    <div class="tile is-child">
+        <h1 class="title">
+        Nueva Categoría
+            </h1>
 <form action="/categorias" method="post">
     {% csrf_token %}
     <div class="field">
@@ -32,5 +47,76 @@
        <input type="submit" value="Submit" class="button">
     </div>
 </form>
+    </div>
 </div>
+
+<div class="modal" id="edit-modal">
+    <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Editar Categoría</p>
+      <button class="delete" aria-label="close" onclick="document.getElementById('edit-modal').className='modal';"></button>
+    </header>
+    <section class="modal-card-body">
+        <div class="field">
+            <label class="label">Nombre:</label>
+            <input type="text" id="categoria-new-name" />
+        </div>
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-success" id="save-change">Save changes</button>
+    </footer>
+  </div>
+</div>
+
+
+<script>
+function delCat(id) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+      if (xhr.readyState===4){
+          if(xhr.status === 200) {
+              location.reload();
+          }
+          else{
+              console.log(xhr.status);
+          }
+      }
+      else{
+          console.log("sending");
+      }
+  };
+  csrftoken = getCookie('csrftoken');
+  xhr.open('PUT', '/view/delete_categoria');
+  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+  data = {categoria_id:id};
+  xhr.send(JSON.stringify(data));
+}
+
+function editCat(id, name) {
+    document.getElementById("categoria-new-name").value=name;
+    document.getElementById("edit-modal").className="modal is-active";
+    document.getElementById("save-change").addEventListener("click", (event) => {
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+          if (xhr.readyState===4){
+              if(xhr.status === 200) {
+                  location.reload();
+              }
+              else{
+                  console.log(xhr.status);
+              }
+          }
+          else{
+              console.log("sending");
+          }
+      };
+      csrftoken = getCookie('csrftoken');
+      xhr.open('PUT', '/view/editar_categoria');
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      data = {categoria_id:id, new_name:document.getElementById("categoria-new-name").value};
+      xhr.send(JSON.stringify(data));
+      });
+    }
+</script>
 {% endblock %}

@@ -1,0 +1,76 @@
+{% block ticket-table %}
+
+<div class="field is-grouped">
+  <div class="container">
+    <label class="label" for="filter">Buscar: </label>
+    <input type="text" id ="word-filter" name="filter" />
+    </div>
+</div>
+<script>
+  document.getElementById("word-filter").addEventListener("change", (event) => {
+    getTicketPage(event);
+  })
+</script>
+
+<div class="field is-grouped">
+  <div class="card" style="padding:5px">
+    <label class="checkbox" for="select-all">Seleccionar todos: </label>
+    <input type="checkbox" class="checkbox" id ="select-all" />
+  </div>
+  <script>
+    document.getElementById("select-all").addEventListener("change", (event) => {
+      selectAll(event.target.checked);
+    });
+  </script>
+  <div class="card" style="padding:5px">
+    <label class="checkbox" for="goto"> Ir a pag: </label>
+    <input type="number" id="goto" style="width:60px" min=1 />
+    <label class="checkbox" for="goto" id="goto-max-label"> /... </label>
+  </div>
+  <script>
+    document.getElementById("goto").addEventListener("change", (event) => {
+      getTicketPage(event.target.value);
+    });
+  </script>
+</div>
+<nav class="pagination is-small is-centered" role="navigation" aria-label="pagination">
+<!--          <a class="pagination-previous" onclick="prevPage();">Previous</a>-->
+    <ul id="page-list" class="pagination-list">
+
+    </ul>
+    <a class="pagination-previous" id="next-page-btn" onclick="prevPage();">Previous</a>
+    <a class="pagination-next" id="prev-page-btn" onclick="nextPage();">Next page</a>
+<!--          <a class="pagination-next" onclick="nextPage();">Next page</a>-->
+</nav>
+<div class="table-container">
+<table class="table is-striped is-narrow" id="ticket-table" style="display:none;">
+    <thead id="ticket-table-head">
+
+    </thead>
+    <tbody id="ticket-table-data">
+
+    </tbody>
+</table>
+</div>
+<div class="container is-centered" style="width:100%;text-align: center;">
+<div class="loader" display="none" id="table-loader"></div>
+</div>
+<nav class="pagination is-small is-centered" role="navigation" aria-label="pagination">
+<!--          <a class="pagination-previous" onclick="prevPage();">Previous</a>-->
+    <ul id="page-list2" class="pagination-list">
+
+    </ul>
+    <a class="pagination-previous" id="next-page-btn2" onclick="prevPage();">Previous</a>
+    <a class="pagination-next" id="prev-page-btn2" onclick="nextPage();">Next page</a>
+<!--          <a class="pagination-next" onclick="nextPage();">Next page</a>-->
+</nav>
+
+<table class="table" id="subticket-table" display="none">
+    <thead id="subticket-table-head">
+
+    </thead>
+    <tbody id="subticket-table-data">
+
+    </tbody>
+</table>
+{% endblock %}

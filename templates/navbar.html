@@ -1,19 +1,31 @@
 {% extends 'base.html' %}
 {% block navbar %}
+<style>
+  @media screen and (max-width: 1023px) {
+    /* show mavbar-menu on screen less than 1024px */
+    #menu-toggle:checked ~ #navbarBasicExample { display: block; }
 
+    /* make navbar-burger become cross on screen less than 1024px */
+    #menu-toggle:checked + .navbar-burger span:nth-child(1) { transform: translateY(5px) rotate(45deg); }
+    #menu-toggle:checked + .navbar-burger span:nth-child(2) { opacity: 0; }
+    #menu-toggle:checked + .navbar-burger span:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
+    /* you can also replace + with ~ in above three rules and get the same result */
+
+    #navbarBasicExample { left:0; right:0; top:100%; position: absolute; }
+  }
+</style>
 <nav class="navbar" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
     <h2 class="navbar-item">
       Sueldito App
     </h2>
-
-    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-    </a>
   </div>
-
+  <input type="checkbox" id="menu-toggle" class="is-hidden">
+  <label for="menu-toggle" role="button" class="navbar-burger burger">
+    <span aria-hidden="true"></span>
+    <span aria-hidden="true"></span>
+    <span aria-hidden="true"></span>
+  </label>
   <div id="navbarBasicExample" class="navbar-menu">
     <div class="navbar-start">
       <a class="navbar-item" href="{% url 'home' %}">
@@ -25,16 +37,47 @@
         Import
       </a>
       <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link" href="{% url 'cuentas' %}">
+          Cuentas
+        </a>
+        <div class="navbar-dropdown">
+          {% for cuenta in cuentas %}
+            <a class="navbar-item" href="/view/cuenta/{{cuenta.id}}">
+              {{cuenta.name}}
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link" href="{% url 'categorias' %}">
+          Categorias
+        </a>
+        <div class="navbar-dropdown">
+          {% for categoria in categorias %}
+            <a class="navbar-item" href="/view/categoria/{{categoria.id}}">
+              {{categoria.name}}
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link" href="{% url 'proyectos' %}">
+          Proyectos
+        </a>
+        <div class="navbar-dropdown">
+          {% for proyecto in proyectos %}
+            <a class="navbar-item" href="/view/proyecto/{{proyecto.id}}">
+              {{proyecto.name}}
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="navbar-item has-dropdown is-hoverable">
         <a class="navbar-link">
           More
         </a>
         <div class="navbar-dropdown">
-          <a class="navbar-item" href="{% url 'cuentas' %}">
-            Cuentas
-          </a>
-          <a class="navbar-item" href="{% url 'categorias' %}">
-            Categorias
-          </a>
+
           <a class="navbar-item" href="{% url 'modos_transferencia' %}">
             Modos de Transferencia
           </a>
@@ -75,5 +118,4 @@
     </div>
   </div>
 </nav>
-
 {% endblock %}

@@ -19,7 +19,7 @@ graphs = []
 historial.layout = html.Div([
     dcc.DatePickerRange(
         id='date-picker',
-        start_date = datetime.date.today()-datetime.timedelta(days=90),
+        start_date = (datetime.date.today()-datetime.timedelta(days=90)).replace(day=1),
         end_date = datetime.date.today(),
     ),
     dcc.RadioItems(
@@ -41,17 +41,19 @@ historial.layout = html.Div([
      Input('convert', 'value')]
 )
 def update_graph(start_date, end_date, convert, session_state=None, *args, **kwargs):
-    from contable.models import Ticket, Cuenta, Categoria
+    import contable.models as md
     if session_state is None:
         raise NotImplemented('Session not created')
     cuenta = session_state.get('cuenta', None)
     categoria = session_state.get('categoria', None)
-    tickets = Ticket.objects.filter(fecha__gte=start_date, fecha__lte=end_date)
+    proyecto = session_state.get('proyecto', None)
+    tickets = md.Ticket.objects.filter(fecha__gte=start_date, fecha__lte=end_date)
     if categoria:
-        tickets = tickets.filter(categoria=Categoria.objects.get(id=categoria))
+        tickets = tickets.filter(categoria=md.Categoria.objects.get(id=categoria))
+    if proyecto:
+        tickets = tickets.filter(proyecto=md.Proyecto.objects.get(id=proyecto))
     if cuenta and cuenta != 'all':
-        tickets = tickets.filter(cuenta=Cuenta.objects.get(id=cuenta))
-
+        tickets = tickets.filter(cuenta=md.Cuenta.objects.get(id=cuenta))
     else:
         convert = 'EUR'
     tickets = tickets.order_by('fecha')
@@ -75,11 +77,12 @@ def update_graph(start_date, end_date, convert, session_state=None, *args, **kwa
         dfpies = dfpies.append(pd.DataFrame(columns=dfpies.columns, data=[('Savings', savings)]))
 
     colors = dict()
-    for cat in Categoria.objects.all():
+    for cat in md.Categoria.objects.all():
         colors[cat.name]=cat.color
     colors['Savings'] = "#006600"
 
     if len(tickets) > 1:
+
         bars = px.bar(dfbars,
                       x='month',
                       y='sum',
@@ -89,19 +92,32 @@ def update_graph(start_date, end_date, convert, session_state=None, *args, **kwa
                           "categoria_name": "Categoria",
                           "sum": "Importe",
                           "month": "Mes",
-                      }
+                      },
+                      hover_data={
+                          'categoria_name': True,
+                          'sum': ':.2f',
+                          'month': False
+                      },
                       )
+        bars.update_layout(hovermode="x unified")
         pie = px.pie(dfpies,
                      title="Gastos",
                      names='categoria_name',
                      color='categoria_name',
                      color_discrete_map=colors,
-                     values='sum')
+                     values='sum'
+                     )
         bars.update_layout(hovermode="x")
+        psums = []
+        for index, row in dfscat.iterrows():
+            if len(psums)>0:
+                psums.append(psums[len(psums)-1]+row['sum'])
+            else:
+                psums.append(row['sum'])
         bars.add_trace(
             go.Scatter(
                 x=dfscat['month'],
-                y=dfscat['sum'],
+                y=psums,
                 name="Neto",
                 mode="lines",
                 line=go.scatter.Line(color="black")

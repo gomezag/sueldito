@@ -1,7 +1,8 @@
 {% extends 'navbar.html' %}
 {%load plotly_dash%}
-
+{% load mathfilters %}
 {% block content %}
+{% load humanize %}
 
 
 <div class="container">
@@ -15,7 +16,9 @@
                 <p class="title is-4"><a  href="view/cuenta/{{cuenta.id}}">{{cuenta.name}}</a></p>
             </div>
             <div class="content">
-                {{cuenta.balance}} EUR
+                {% with numerator=cuenta.balance|div:cuenta.moneda.cambio %}
+                {{ numerator|floatformat:2|intcomma }} {{cuenta.moneda.key}}
+                {% endwith %}
             </div>
         </div>
     {% endfor %}
