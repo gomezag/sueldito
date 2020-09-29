@@ -28,6 +28,7 @@ def cuenta(request, cuenta_id=None):
             c['cuenta'] = CuentaSerializer(Cuenta.objects.get(id=cuenta_id)).data
 
             return render(request, 'reports/cuenta.html', c)
+
     else:
 
         return redirect('cuentas/')
