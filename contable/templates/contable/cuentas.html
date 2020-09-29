@@ -1,26 +1,60 @@
 {% extends 'navbar.html' %}
 {%load plotly_dash%}
-
+{% load mathfilters %}
 {% block content %}
+{% load humanize %}
 
 
 <div class="container">
-    {%plotly_app name="BalanceHistorial" ratio=0.4 %}
-
     <h1 class="title"> Cuentas </h1>
     <div class="content">
     {% for cuenta in cuentas %}
         <div class="card">
             <div class="media-content">
-                <p class="title is-4"><a  href="view/cuenta/{{cuenta.id}}">{{cuenta.name}}</a></p>
+                <p class="title is-4"><a  href="view/cuenta/{{cuenta.id}}">{{cuenta.name}}</a>
+                <span class="icon" onclick="editCuenta('{{cuenta.id}}', '{{cuenta.name}}');">
+                    <icon class="fa fa-edit"></icon>
+                </span>
+                <span class="icon" onclick="deleteCuenta('{{cuenta.id}}');">
+                    <icon class="fa fa-trash"></icon>
+                </span>
+                </p>
             </div>
             <div class="content">
-                {{cuenta.balance}} EUR
+                {% with numerator=cuenta.balance|div:cuenta.moneda.cambio %}
+                    Saldo: {{ numerator|floatformat:2|intcomma }} {{cuenta.moneda.key}}
+                {% endwith %}
             </div>
         </div>
     {% endfor %}
     </div>
+    {%plotly_app name="BalanceHistorial" ratio=1 %}
+
 </div>
+
+
+<div class="modal" id="edit-modal">
+    <div class="modal-background">
+
+    </div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Editar Cuenta</p>
+          <button class="delete" aria-label="close" onclick="document.getElementById('edit-modal').className='modal';"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="field">
+                <label class="label">Nombre:</label>
+                <input type="text" id="cuenta-new-name" />
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+          <button class="button is-success" id="save-change">Save changes</button>
+        </footer>
+    </div>
+</div>
+
+
 <div class="container">
 
     <form action="/cuentas" method="post">
@@ -31,4 +65,54 @@
         <input type="submit" value="Crear cuenta">
     </form>
 </div>
+
+<script>
+function deleteCuenta(id) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+      if (xhr.readyState===4){
+          if(xhr.status === 200) {
+              location.reload();
+          }
+          else{
+              console.log(xhr.status);
+          }
+      }
+      else{
+          console.log("sending");
+      }
+  };
+  csrftoken = getCookie('csrftoken');
+  xhr.open('PUT', '/view/delete_cuenta');
+  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+  data = {cuenta_id:id};
+  xhr.send(JSON.stringify(data));
+}
+
+function editCuenta(id, name) {
+    document.getElementById("cuenta-new-name").value=name;
+    document.getElementById("edit-modal").className="modal is-active";
+    document.getElementById("save-change").addEventListener("click", (event) => {
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+          if (xhr.readyState===4){
+              if(xhr.status === 200) {
+                  location.reload();
+              }
+              else{
+                  console.log(xhr.status);
+              }
+          }
+          else{
+              console.log("sending");
+          }
+      };
+      csrftoken = getCookie('csrftoken');
+      xhr.open('PUT', '/view/editar_cuenta');
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      data = {cuenta_id:id, new_name:document.getElementById("cuenta-new-name").value};
+      xhr.send(JSON.stringify(data));
+      });
+    }
+</script>
 {% endblock %}

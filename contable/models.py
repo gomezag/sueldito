@@ -2,12 +2,12 @@ from django.db import models
 from django.db.models import Sum
 from django.db.models.signals import post_save
 from django.utils.functional import cached_property
-
+from colorfield.fields import ColorField
 # Create your models here.
 
 class Categoria(models.Model):
     name = models.CharField(max_length=200)
-    color = models.CharField(max_length=10, null=True, blank=True)
+    color = ColorField(default='#FF0000', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -16,7 +16,6 @@ class Categoria(models.Model):
 class Proyecto(models.Model):
     name = models.CharField(max_length=200)
     color = models.CharField(max_length=10, null=True, blank=True)
-
     def __str__(self):
         return self.name
 
@@ -58,15 +57,25 @@ class Cuenta(models.Model):
         return min_date
 
 
+def get_uncategorized():
+    return Categoria.objects.get(name="No Categorizado")
+
+
+def get_unassigned():
+    return Proyecto.objects.get(name="No asignado")
+
 class Ticket(models.Model):
     fecha = models.DateField('Fecha')
     cuenta = models.ForeignKey(Cuenta, on_delete=models.CASCADE)
     importe = models.FloatField('importe')
     moneda = models.ForeignKey(Moneda, on_delete=models.SET_NULL, null=True, blank=True)
-    tipo = models.ForeignKey(ModoTransferencia, on_delete=models.SET_NULL, null=True, blank=True)
+    modo = models.ForeignKey(ModoTransferencia, on_delete=models.SET_NULL, null=True, blank=True)
     concepto = models.CharField(max_length=200)
-    categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT, null=False, blank=False)
+    categoria = models.ForeignKey(Categoria, on_delete=models.SET(get_uncategorized),
+                                  null=False, blank=False)
     consistency = models.BooleanField(default=False)
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.SET(get_unassigned),
+                                 null=False, blank=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -116,7 +125,7 @@ def create_subticket_on_ticket_creation(sender, instance, created, **kwargs):
     if instance and created:
         t = Ticket.objects.get(pk=instance.id)
         t.subticket_set.create(importe=instance.importe, concepto="N.C.",
-                               transaccion=t.tipo)
+                               transaccion=t.modo)
 
 
 def check_ticket_consistency_after_subticket_creation(sender, instance, created, **kwargs):

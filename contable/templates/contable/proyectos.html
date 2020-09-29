@@ -6,22 +6,111 @@
 <div class="container">
 
     <h1 class="title"> Proyectos </h1>
-    <div class="list is-hoverable">
+    <div class="content">
     {% for proyecto in proyectos %}
-        <a class="list-item">
-            {{proyecto}}
-        </a>
+        <div class="card">
+            <div class="media-content">
+              <div class="title">
+                <p class="title is-4">
+                    <a  href="view/proyecto/{{proyecto.id}}">{{proyecto.name}}</a>
+                    <span class="icon" onclick="editProyecto('{{proyecto.id}}', '{{proyecto.name}}');">
+                        <icon class="fa fa-edit"></icon>
+                    </span>
+                    <span class="icon" onclick="delProyecto('{{proyecto.id}}');">
+                        <icon class="fa fa-trash"></icon>
+                    </span>
+                </p>
+                </div>
+            </div>
+        </div>
     {% endfor %}
     </div>
 </div>
+
 <div class="container">
 
-<form action="/proyectos" method="post">
-    {% csrf_token %}
-    <div class="field is-grouped">
-        <input type="text" name="name" />
-       <input type="submit" value="Submit" class="button">
+    <div class="tile is-child">
+        <h1 class="title">
+        Nuevo Proyecto
+            </h1>
+        <form action="/proyectos" method="post">
+        {% csrf_token %}
+            {{form}}
+            <div class="field">
+               <input type="submit" value="Submit" class="button">
+            </div>
+        </form>
     </div>
-</form>
 </div>
+
+<div class="modal" id="edit-modal">
+    <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Editar Proyecto</p>
+      <button class="delete" aria-label="close" onclick="document.getElementById('edit-modal').className='modal';"></button>
+    </header>
+    <section class="modal-card-body">
+        <div class="field">
+            <label class="label">Nombre:</label>
+            <input type="text" id="proyecto-new-name" />
+        </div>
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-success" id="save-change">Save changes</button>
+    </footer>
+  </div>
+</div>
+
+
+<script>
+function delProyecto(id) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+      if (xhr.readyState===4){
+          if(xhr.status === 200) {
+              location.reload();
+          }
+          else{
+              console.log(xhr.status);
+          }
+      }
+      else{
+          console.log("sending");
+      }
+  };
+  csrftoken = getCookie('csrftoken');
+  xhr.open('PUT', '/view/delete_proyecto');
+  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+  data = {proyecto_id:id};
+  xhr.send(JSON.stringify(data));
+}
+
+function editProyecto(id, name) {
+    document.getElementById("proyecto-new-name").value=name;
+    document.getElementById("edit-modal").className="modal is-active";
+    document.getElementById("save-change").addEventListener("click", (event) => {
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+          if (xhr.readyState===4){
+              if(xhr.status === 200) {
+                  location.reload();
+              }
+              else{
+                  console.log(xhr.status);
+              }
+          }
+          else{
+              console.log("sending");
+          }
+      };
+      csrftoken = getCookie('csrftoken');
+      xhr.open('PUT', '/view/editar_proyecto');
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      data = {categoria_id:id, new_name:document.getElementById("new-name").value};
+      xhr.send(JSON.stringify(data));
+      });
+    }
+</script>
 {% endblock %}
+

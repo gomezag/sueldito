@@ -1,0 +1,21 @@
+<div class="tabs">
+  <ul>
+    <li class="is-active"><a data-tab="dash">Dash</a></li>
+    <li><a data-tab="table">Table</a></li>
+  </ul>
+</div>
+<script>
+  var list = document.getElementsByClassName("tabs")[0].getElementsByTagName("a");
+  for (var i = 0; i < list.length; i++) {
+    list[i].addEventListener("click", (event) => {changeTab(event);})
+  }
+  function changeTab(tab){
+    document.getElementsByClassName("tabs")[0].getElementsByClassName("is-active")[0].classList.remove("is-active");
+    tab.target.parentNode.classList += "is-active";
+    var content = tab.target.getAttribute('data-tab');
+    document.getElementById("tabs-container").childNodes.forEach(node => {
+      node.style = "display:none";
+    });
+    document.getElementById(content).style="display:block";
+  }
+</script>
