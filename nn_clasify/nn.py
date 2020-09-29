@@ -111,9 +111,10 @@ class AutoClassifier(nn.Module):
         if cat_vector[index_of_max] > 0.7:
             cat = self.out_dictionary[index_of_max]
             cat = Categoria.objects.get(name=cat)
+            return cat
         else:
             print("no prediction at "+str(cat_vector[index_of_max]))
-        return cat
+            return None
 
     def train_nn(self, train_tickets, iterations=1000, neurons=10):
         device = torch.device("cpu")
