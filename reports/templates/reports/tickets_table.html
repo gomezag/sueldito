@@ -14,12 +14,24 @@
 
 <div class="field is-grouped">
   <div class="card" style="padding:5px">
+      <div class="field is-grouped">
     <label class="checkbox" for="select-all">Seleccionar todos: </label>
-    <input type="checkbox" class="checkbox" id ="select-all" />
+    <input type="checkbox" class="checkbox" id ="select-all"/>
+          </div>
+      <div class="field" id="select-all-all-div" hidden>
+          <label class="checkbox" for="select-all-all"> Seleccionar en todas las pags. (
+            <div style="display:inline" id="select-all-all-total"> ### </div>
+            )
+          </label>
+          <input type="checkbox" class="checkbox" id="select-all-all" />
+      </div>
   </div>
   <script>
+    document.getElementById("select-all").checked=false;
+    document.getElementById("select-all-all-div").checked=false;
     document.getElementById("select-all").addEventListener("change", (event) => {
       selectAll(event.target.checked);
+      document.getElementById("select-all-all-div").hidden=!document.getElementById("select-all").checked;
     });
   </script>
   <div class="card" style="padding:5px">

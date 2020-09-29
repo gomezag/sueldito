@@ -131,6 +131,7 @@ def import_file(request):
         ticket.moneda = moneda
         ticket.cuenta = cuenta
         ticket.categoria = Categoria.objects.get(name="No Categorizado")
+        ticket.proyecto = Proyecto.objects.get(name="No asignado")
         tickets.append(ticket)
 
     for ticket in tickets:

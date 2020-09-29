@@ -31,6 +31,15 @@ historial.layout = html.Div([
         value='LOC',
         labelStyle={'display': 'inline-block'}
     ),
+    dcc.RadioItems(
+        id='grouping',
+        options=[
+            {'label': 'Categorias', 'value': 'categoria'},
+            {'label': 'Proyectos', 'value': 'proyecto'}
+        ],
+        value='categoria',
+        labelStyle={'display': 'inline-block'}
+    ),
     html.Div(id='plotarea', children=graphs),
 ])
 
@@ -38,31 +47,41 @@ historial.layout = html.Div([
     Output('plotarea', 'children'),
     [Input('date-picker', 'start_date'),
      Input('date-picker', 'end_date'),
-     Input('convert', 'value')]
+     Input('convert', 'value'),
+     Input('grouping', 'value')]
 )
-def update_graph(start_date, end_date, convert, session_state=None, *args, **kwargs):
+def update_graph(start_date, end_date, convert, group, session_state=None, *args, **kwargs):
     import contable.models as md
     if session_state is None:
         raise NotImplemented('Session not created')
     cuenta = session_state.get('cuenta', None)
-    categoria = session_state.get('categoria', None)
+    categoria= session_state.get('categoria', None)
     proyecto = session_state.get('proyecto', None)
     tickets = md.Ticket.objects.filter(fecha__gte=start_date, fecha__lte=end_date)
+
     if categoria:
         tickets = tickets.filter(categoria=md.Categoria.objects.get(id=categoria))
+
     if proyecto:
         tickets = tickets.filter(proyecto=md.Proyecto.objects.get(id=proyecto))
+
     if cuenta and cuenta != 'all':
         tickets = tickets.filter(cuenta=md.Cuenta.objects.get(id=cuenta))
     else:
         convert = 'EUR'
     tickets = tickets.order_by('fecha')
+
     if convert == 'EUR':
         tickets = tickets.annotate(importe_conv=F('importe') * F('moneda__cambio'))
     else:
         tickets = tickets.annotate(importe_conv=F('importe'))
+
     tickets = tickets.annotate(month=TruncMonth('fecha'))
-    tickets = tickets.annotate(categoria_name=F('categoria__name'))
+
+    if group == 'categoria':
+        tickets = tickets.annotate(categoria_name=F('categoria__name'))
+    elif group == 'proyecto':
+        tickets = tickets.annotate(categoria_name=F('proyecto__name'))
 
     dfbars = pd.DataFrame(list(tickets.values('month', 'categoria_name').order_by(
         'month').annotate(sum=Sum('importe_conv'))))
@@ -70,11 +89,17 @@ def update_graph(start_date, end_date, convert, session_state=None, *args, **kwa
     dfscat = pd.DataFrame(list(tickets.values('month').order_by(
         'month').annotate(sum=Sum('importe_conv'))))
 
-    dfpies = pd.DataFrame(list(tickets.values('categoria_name').order_by(
-        'month').annotate(sum=-Sum('importe_conv'))))
-    savings = sum([ticket.importe_conv for ticket in tickets])
-    if savings > 0:
-        dfpies = dfpies.append(pd.DataFrame(columns=dfpies.columns, data=[('Savings', savings)]))
+    dfpies = []
+
+    # tickets = tickets.filter(fecha__gte=datetime.date(2020,9,1))
+    # for month in [1]:
+    #     tipie = tickets.values('categoria_name').annotate(sum=-Sum('importe_conv'))
+    #     pie = pd.DataFrame(list(tipie))
+    #
+    #     savings = sum([ticket.importe_conv for ticket in tickets])
+    #     if savings > 0:
+    #         pie.append(pd.DataFrame(columns=pie.columns, data=[('Savings', savings)]))
+    #     dfpies.append(pie)
 
     colors = dict()
     for cat in md.Categoria.objects.all():
@@ -100,13 +125,13 @@ def update_graph(start_date, end_date, convert, session_state=None, *args, **kwa
                       },
                       )
         bars.update_layout(hovermode="x unified")
-        pie = px.pie(dfpies,
-                     title="Gastos",
+        pies = [px.pie(pie,
+                     title="Mes",
                      names='categoria_name',
                      color='categoria_name',
                      color_discrete_map=colors,
                      values='sum'
-                     )
+                     ) for pie in dfpies]
         bars.update_layout(hovermode="x")
         psums = []
         for index, row in dfscat.iterrows():
@@ -124,15 +149,17 @@ def update_graph(start_date, end_date, convert, session_state=None, *args, **kwa
         ))
     else:
         bars = [html.Div('No data!')]
-        pie = [html.Div('No data!')]
-
-    return [
-        dcc.Graph(
-            id='balance_history',
-            figure=bars,
-        ),
-        dcc.Graph(
-            id='pies',
-            figure=pie,
+        pies = [html.Div('No data!')]
+    fig = [dcc.Graph(
+        id='balance_history',
+        figure=bars)]
+    i=0
+    for pie in pies:
+        i+=1
+        fig.append(
+            dcc.Graph(
+                id='pies'+str(i),
+                figure=pie,
+            )
         )
-    ]
+    return fig

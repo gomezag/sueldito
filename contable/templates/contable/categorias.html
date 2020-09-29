@@ -28,45 +28,47 @@
 </div>
 
 <div class="container">
-
     <div class="tile is-child">
         <h1 class="title">
         Nueva Categoría
-            </h1>
-<form action="/categorias" method="post">
-    {% csrf_token %}
-    <div class="field">
-        <label class="label">Name: </label>
-        <input type="text" name="name" />
-    </div>
-    <div class="field">
-        <label class="label">Key: </label>
-        <input type="text" name="key" />
-    </div>
-    <div class="field">
-       <input type="submit" value="Submit" class="button">
-    </div>
-</form>
+        </h1>
+
+        <form action="/categorias" method="post">
+            {% csrf_token %}
+            <div class="field">
+                <label class="label">Name: </label>
+                <input type="text" name="name" />
+            </div>
+            <div class="field">
+                <label class="label">Key: </label>
+                <input type="text" name="key" />
+            </div>
+            <div class="field">
+               <input type="submit" value="Submit" class="button">
+            </div>
+        </form>
     </div>
 </div>
 
 <div class="modal" id="edit-modal">
-    <div class="modal-background"></div>
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">Editar Categoría</p>
-      <button class="delete" aria-label="close" onclick="document.getElementById('edit-modal').className='modal';"></button>
-    </header>
-    <section class="modal-card-body">
-        <div class="field">
-            <label class="label">Nombre:</label>
-            <input type="text" id="categoria-new-name" />
-        </div>
-    </section>
-    <footer class="modal-card-foot">
-      <button class="button is-success" id="save-change">Save changes</button>
-    </footer>
-  </div>
+    <div class="modal-background">
+
+    </div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Editar Categoria</p>
+          <button class="delete" aria-label="close" onclick="document.getElementById('edit-modal').className='modal';"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="field">
+                <label class="label">Nombre:</label>
+                <input type="text" id="categoria-new-name" />
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+          <button class="button is-success" id="save-change">Save changes</button>
+        </footer>
+    </div>
 </div>
 
 

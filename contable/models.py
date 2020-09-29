@@ -61,6 +61,9 @@ def get_uncategorized():
     return Categoria.objects.get(name="No Categorizado")
 
 
+def get_unassigned():
+    return Proyecto.objects.get(name="No asignado")
+
 class Ticket(models.Model):
     fecha = models.DateField('Fecha')
     cuenta = models.ForeignKey(Cuenta, on_delete=models.CASCADE)
@@ -68,9 +71,11 @@ class Ticket(models.Model):
     moneda = models.ForeignKey(Moneda, on_delete=models.SET_NULL, null=True, blank=True)
     modo = models.ForeignKey(ModoTransferencia, on_delete=models.SET_NULL, null=True, blank=True)
     concepto = models.CharField(max_length=200)
-    categoria = models.ForeignKey(Categoria, on_delete=models.SET(get_uncategorized), null=False, blank=False)
+    categoria = models.ForeignKey(Categoria, on_delete=models.SET(get_uncategorized),
+                                  null=False, blank=False)
     consistency = models.BooleanField(default=False)
-    proyecto = models.ForeignKey(Proyecto, on_delete=models.SET_NULL, null=True)
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.SET(get_unassigned),
+                                 null=False, blank=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

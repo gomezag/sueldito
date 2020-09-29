@@ -4,6 +4,8 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 
+from sueldito.views import get_base_context
+
 # from reports.dashapps import HistorialBalance
 
 from .serializers import *
@@ -44,26 +46,25 @@ def categorias(request):
 
 @require_http_methods(["GET", "POST"])
 @login_required(login_url='/accounts/login')
-def cuentas(request):
-    session = request.session
-    bargraph_state = session.get('django_plotly_dash', {})
-    bargraph_state['cuenta'] = 'all'
-    bargraph_state['categoria'] = None
-    session['django_plotly_dash'] = bargraph_state
+def cuentas(request, cuenta_id=None):
+    if cuenta_id is None:
+        session = request.session
+        bargraph_state = session.get('django_plotly_dash', {})
+        bargraph_state['cuenta'] = 'all'
+        bargraph_state['categoria'] = None
+        session['django_plotly_dash'] = bargraph_state
 
-    if request.method == 'POST':
-        cuenta = Cuenta()
-        cuenta.name = request.POST['name']
-        cuenta.key = request.POST['key']
-        cuenta.save()
-    else:
-        form = CuentaForm()
+        if request.method == 'POST':
+            cuenta = Cuenta()
+            cuenta.name = request.POST['name']
+            cuenta.key = request.POST['key']
+            cuenta.save()
+        else:
+            form = CuentaForm()
 
-    c = dict(form=form)
-    c['cuentas'] = CuentaSerializer(Cuenta.objects.all(), many=True).data
-    c['categorias'] = CategoriaSerializer(Categoria.objects.all(), many=True).data
-    c['proyectos'] = ProyectoSerializer(Proyecto.objects.all(), many=True).data
-    return render(request, 'contable/cuentas.html', c)
+        c = dict(form=form)
+        c = {**c, **get_base_context()}
+        return render(request, 'contable/cuentas.html', c)
 
 @require_http_methods(["GET", "POST"])
 @login_required(login_url='/accounts/login')
@@ -115,3 +116,4 @@ def modos_transferencia(request):
     c['categorias'] = CategoriaSerializer(Categoria.objects.all(), many=True).data
     c['proyectos'] = ProyectoSerializer(Proyecto.objects.all(), many=True).data
     return render(request, 'contable/modos_transferencia.html', c)
+

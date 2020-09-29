@@ -9,9 +9,15 @@ from contable.models import *
 @require_http_methods(["GET", "POST"])
 @login_required(login_url='/accounts/login')
 def home(request):
-    c = dict()
-    c['cuentas'] = CuentaSerializer(Cuenta.objects.all(), many=True).data
-    c['categorias'] = CategoriaSerializer(Categoria.objects.all(), many=True).data
-    c['proyectos'] = ProyectoSerializer(Proyecto.objects.all(), many=True).data
+    c = get_base_context()
     return render(request, 'home.html', c)
 
+
+def get_base_context():
+    c = dict()
+
+    c['cuentas'] = CuentaSerializer(Cuenta.objects.all().order_by('name'), many=True).data
+    c['categorias'] = CategoriaSerializer(Categoria.objects.all().order_by('name'), many=True).data
+    c['proyectos'] = ProyectoSerializer(Proyecto.objects.all().order_by('name'), many=True).data
+
+    return c

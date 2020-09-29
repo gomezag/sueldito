@@ -87,6 +87,9 @@ function handleTicketData(result) {
             $("#ticket-table-head").empty();
             current_page = parseInt(result.page_number);
             total_pages = result.pages.length;
+
+            document.getElementById("select-all-all-total").innerHTML=result.total_tickets.length;
+
             var headers = ["Fecha", "Concepto", "Importe", "Saldo", "Moneda", "Categoria","Proyecto", "Borrar", "Seleccionar"];
             head = document.getElementById("ticket-table-head");
             headers.forEach(header => {
@@ -190,7 +193,12 @@ function handleTicketData(result) {
 
                                 select.addEventListener('change', (event) => {
                                       var tickets = getSelectedTickets();
-                                      tickets.push(ticket.id);
+                                      if(tickets=='all'){
+                                        tickets = result.total_tickets;
+                                      }
+                                      else {
+                                        tickets.push(ticket.id);
+                                      }
                                       editTickets('proyecto', event.target.value, tickets);
                                     });
                         div.appendChild(select);
@@ -220,7 +228,7 @@ function handleTicketData(result) {
                                 }
                             };
                             csrftoken = getCookie('csrftoken');
-                            xhr.open('PUT', '/view/borrar?ticket_id='+ticket.id);
+                            xhr.open('PUT', '/view/delete_ticket?ticket_id='+ticket.id);
                             xhr.setRequestHeader("X-CSRFToken", csrftoken);
                             var data = {ticket_id: ticket.id};
                             xhr.send();
@@ -255,14 +263,19 @@ function handleTicketData(result) {
     }
 
 function getSelectedTickets(){
-  let tickets = [];
-  let checkboxes = document.getElementsByName("selected-tickets-chkbox");
-  for(var i=0; i<checkboxes.length;i++){
-    if(checkboxes[i].checked){
-      tickets.push(checkboxes[i].getAttribute("data-ticketid"));
-    }
+  if(document.getElementById('select-all-all').checked){
+    return 'all';
   }
-  return tickets;
+  else{
+      let tickets = [];
+      let checkboxes = document.getElementsByName("selected-tickets-chkbox");
+      for(var i=0; i<checkboxes.length;i++){
+        if(checkboxes[i].checked){
+          tickets.push(checkboxes[i].getAttribute("data-ticketid"));
+        }
+      }
+      return tickets;
+  }
 }
 
 function createPaginationLinks(pages, list){
