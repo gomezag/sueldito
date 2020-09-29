@@ -2,6 +2,7 @@
 
 static/
 import_data/
+torch_models/
 # Django #
 *.log
 *.pot

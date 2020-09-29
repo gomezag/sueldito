@@ -23,7 +23,7 @@ class AutoClassifierTest(TestCase):
                               importe=100, cuenta=self.cuenta, moneda=moneda,
                               categoria=Categoria.objects.get(name="No Categorizado"), proyecto=proyecto)
 
-        self.vectorized_tickets = torch.tensor([np.array([1, 1, 1, 1, 1, 1, 1]),np.array([1, 1, 1, 1, 1, 1, 1])], dtype=torch.float)
+        self.vectorized_ticket = torch.tensor([1, 1, 1, 1, 1, 1, 1], dtype=torch.float)
 
         self.classifier = AutoClassifier()
 
@@ -33,19 +33,26 @@ class AutoClassifierTest(TestCase):
         #assert
         self.assertEquals(self.classifier.dim_out, 2)
 
-    def test_vectorizing(self):
+    def test_vectorize_ticket(self):
         #prepare
         self.classifier.setup_train_data(self.cuenta)
-        expected_results = self.vectorized_tickets
-        expected_single_result = torch.tensor(np.array([1, 1, 1, 1, 1, 1, 1]), dtype=torch.float)
+        expected_single_result = self.vectorized_ticket
+        # act
+        single_result = self.classifier.vectorize_ticket(self.ticket)
+        #assert
+        self.assertEqual(single_result.tolist(), expected_single_result.tolist())
+
+    def test_vectorize_tickets(self):
+        #prepare
+        self.classifier.setup_train_data(self.cuenta)
+        expected_results = torch.stack([self.vectorized_ticket, self.vectorized_ticket],0)
 
         #act
         results = self.classifier.vectorize_tickets(Ticket.objects.all())
-        single_result = self.classifier.vectorize_ticket(self.ticket)
 
         #assert
         self.assertEqual(len(results), len(expected_results))
-        self.assertEqual(single_result.tolist(), expected_single_result.tolist())
+
         for i in range(len(results)):
             self.assertEqual(results[i].tolist(), expected_results[i].tolist())
 
@@ -91,3 +98,18 @@ class AutoClassifierTest(TestCase):
         #assert
         self.assertIsInstance(self.classifier._module, nn.Sequential)
         self.assertEqual(result, expected_result)
+
+    def test_save_load(self):
+        # prepare
+        self.classifier.setup_train_data(self.cuenta)
+        training_tickets = Ticket.objects.filter(categoria=self.categoria)
+        self.classifier.train_nn(training_tickets, iterations=1000, neurons=100)
+
+        #act
+        self.classifier.save_nn('torch_models/test-model')
+        classifier2 = AutoClassifier()
+        classifier2.load_nn('torch_models/test-model')
+
+        #assert
+        self.assertIsInstance(self.classifier._module, nn.Sequential)
+        self.assertEqual(self.classifier.predict(self.ticket), classifier2.predict(self.ticket))

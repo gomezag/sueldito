@@ -1,12 +1,14 @@
 from django.db.models.functions import ExtractWeekDay, ExtractMonth, ExtractDay
 from django.db.models import F
 from contable.models import *
-from torch.optim import Adam
+
 import torch
+import torch.nn as nn
+from torch.optim import Adam
 
 import numpy as np
-import torch.nn as nn
 
+import pickle as pkl
 
 class AutoClassifier(nn.Module):
     def __init__(self):
@@ -17,6 +19,7 @@ class AutoClassifier(nn.Module):
         self.model_out_key = 'cat'
         self.dim_in = 0
         self.dim_out = 0
+        self.dim_h = 10
         self._module = None
 
     def annotate_tickets(self, tickets):
@@ -56,40 +59,25 @@ class AutoClassifier(nn.Module):
         self.out_dictionary = list(set([ticket[self.model_out_key] for ticket in tickets.values(self.model_out_key)]))
         self.dim_out = len(self.out_dictionary)
 
-
     def vectorize_tickets(self, tickets):
-        tickets = list(self.annotate_tickets(tickets))
-        results = []
-        for ticket in tickets:
-            vector = np.array([])
-            for key in self.model_in_keys:
-                sub_vector = np.array([
-                                0 if i != self.in_dictionary[key].index(ticket[key])
-                                else 1
-                                for i in range(len(self.in_dictionary[key]))
-                             ])
-                vector = np.concatenate([vector, sub_vector])
-            results.append(vector)
+        results = torch.stack([self.vectorize_ticket(ticket) for ticket in tickets], 0)
 
-        results = torch.tensor(results, dtype=torch.float)
         return results
 
     def vectorize_ticket(self, ticket):
         ticket = self.annotate_ticket(ticket)
-        results = []
 
-        vector = np.array([])
+        vector = []
         for key in self.model_in_keys:
-            sub_vector = np.array([
+            sub_vector = [
                             0 if i != self.in_dictionary[key].index(ticket[key])
                             else 1
                             for i in range(len(self.in_dictionary[key]))
-                         ])
-            vector = np.concatenate([vector, sub_vector])
-        results = vector
+                         ]
+            vector += sub_vector
 
-        results = torch.tensor(results, dtype=torch.float)
-        return results
+        result = torch.tensor(vector, dtype=torch.float)
+        return result
 
     def vectorize_categoria(self, tickets):
         tickets = self.annotate_tickets(tickets)
@@ -119,7 +107,6 @@ class AutoClassifier(nn.Module):
     def train_nn(self, train_tickets, iterations=1000, neurons=10):
         device = torch.device("cpu")
         self.dim_h = neurons
-
         self._module = nn.Sequential(nn.Linear(self.dim_in, self.dim_h),
             nn.ReLU(),
             nn.Linear(self.dim_h, self.dim_out),
@@ -149,3 +136,31 @@ class AutoClassifier(nn.Module):
         y = self._module(x)
 
         return self.devectorize_categoria(y)
+
+    def save_nn(self, filename):
+        torch.save(self._module.state_dict(), filename+'.torch')
+        conf = dict(
+            in_dictionary=self.in_dictionary,
+            out_dictionary=self.out_dictionary,
+            model_in_keys=self.model_in_keys,
+            model_out_keys=self.model_out_key,
+            dim_in=self.dim_in,
+            dim_out=self.dim_out,
+            dim_h=self.dim_h,
+        )
+        with open(filename+'.conf', 'wb') as f:
+            pkl.dump(conf,f)
+
+    def load_nn(self, filename):
+        with open(filename+'.conf', 'rb') as f:
+            conf = pkl.load(f)
+
+        for key in ['in_dictionary', 'out_dictionary', 'model_in_keys', 'model_out_keys', 'dim_in', 'dim_out', 'dim_h']:
+            self.__setattr__(key, conf[key])
+        self._module = nn.Sequential(nn.Linear(self.dim_in, self.dim_h),
+            nn.ReLU(),
+            nn.Linear(self.dim_h, self.dim_out),
+            nn.Sigmoid(),
+            )
+        self._module.load_state_dict(torch.load(filename+'.torch'))
+        self._module.eval()
