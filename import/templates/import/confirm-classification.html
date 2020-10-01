@@ -1,0 +1,54 @@
+{% extends 'navbar.html' %}
+{% load macros %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="tile is-ancestor">
+        <div class="tile is-parent">
+
+            <div class="tile is-child">
+                <table class="table">
+                    <thead>
+                        <th>
+                            Fecha
+                        </th>
+                        <th>
+                            Concepto
+                        </th>
+                        <th>
+                            Importe
+                        </th>
+                        <th>
+                            Categoria
+                        </th>
+
+                    </thead>
+                    <tbody>
+                    {% for ticket in tickets %}
+                    <tr>
+                            <td>
+                                {{ticket.fecha}}
+                            </td>
+                            <td>
+                                {{ticket.concepto}}
+                            </td>
+                            <td>
+                                {{ticket.importe}}
+                            </td>
+                            <td>
+                                {{ticket.categoria.name}}
+                            </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
