@@ -17,7 +17,7 @@ def auto_classify(request):
     c = get_base_context()
     df = pandas.read_json(request.POST['data'])
     classifier = AutoClassifier()
-    classifier.load_nn('./torch_models/minibatch')
+    classifier.load_nn('./torch_models/50pOK50pNC')
     cuenta = Cuenta.objects.get(name=request.POST['cuenta'])
     moneda = Moneda.objects.get(name=request.POST['moneda'])
     tickets = []

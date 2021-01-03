@@ -35,16 +35,53 @@ function selectAll(state){
 
 function getTicketPage(page) {
     let keyword = document.getElementById("word-filter").value;
-
-    document.getElementById("ticket-table").style="display:none;";
-    document.getElementById("table-loader").style="display:content;";
-    $("#page-list").empty();
-    $("#page-list2").empty();
     $.getJSON("tickets?page="+page+"&keyword="+keyword, function(data) {
+                        $("#page-list").empty();
+                        $("#page-list2").empty();
                         handleTicketData(data);
+                        //populateTable(data);
                         document.getElementById("ticket-table").style="display:content;";
                         document.getElementById("table-loader").style="display:none;";
                     });
+}
+
+function populateTable(result){
+    $("#ticket-table").empty();
+    current_page = parseInt(result.page_number);
+    total_pages = result.pages.length;
+
+    document.getElementById("select-all-all-total").innerHTML=result.total_tickets.length;
+
+    var headers = result.headers;
+    var tickets = result.tickets;
+    head = document.createElement("div");
+    head.className="Heading";
+
+    let th;
+    headers.forEach(header => {
+        th = document.createElement("div");
+        th.className = "Cell";
+        th.innerHTML=header[1];
+        head.appendChild(th);
+    });
+    document.getElementById("ticket-table").appendChild(head);
+    let tr;
+    let td;
+    tickets.forEach(ticket => {
+        tr = document.createElement("div");
+        tr.className = "Row";
+        headers.forEach(header => {
+            td = document.createElement("div");
+            td.className="Cell";
+            let result = ticket;
+            header[0].split("__").forEach(lvl => {
+               result = result[lvl];
+            });
+            td.innerHTML = result;
+            tr.appendChild(td);
+        });
+        document.getElementById("ticket-table").appendChild(tr);
+    });
 }
 
 function getSubTickets(ticket_id){
@@ -58,14 +95,16 @@ function getSubTickets(ticket_id){
 function failData(result) {
     console.log("failed");
     console.log(result);
-    }
+}
 
-function editTickets(attribute, value, tickets){
+function editTickets(attribute, value, tickets, row){
+  row.className="RowBlurred";
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
       if (xhr.readyState===4){
           if(xhr.status === 200) {
-              getTicketPage(current_page);
+            console.log(xhr.status);
+            getTicketPage(current_page);
           }
           else{
               console.log(xhr.status);
@@ -76,32 +115,113 @@ function editTickets(attribute, value, tickets){
       }
   };
   csrftoken = getCookie('csrftoken');
-  xhr.open('PUT', '/view/editar_ticket');
+  xhr.open('PUT', '/api/editar_ticket');
   xhr.setRequestHeader("X-CSRFToken", csrftoken);
   data = {tickets:tickets, attribute: attribute, value: value};
   xhr.send(JSON.stringify(data));
 }
 
 function handleTicketData(result) {
-            $("#ticket-table-data").empty();
-            $("#ticket-table-head").empty();
+            $("#ticket-table").empty();
             current_page = parseInt(result.page_number);
             total_pages = result.pages.length;
 
             document.getElementById("select-all-all-total").innerHTML=result.total_tickets.length;
 
-            var headers = ["Fecha", "Concepto", "Importe", "Saldo", "Moneda", "Categoria","Proyecto", "Borrar", "Seleccionar"];
-            head = document.getElementById("ticket-table-head");
+            var headers = ["Cuenta","Cuenta Destino", "Fecha", "Concepto", "Importe", "Saldo", "Moneda", "Categoria","Proyecto", "Borrar", "Seleccionar"];
+            head = document.createElement("div");
+            head.className="Heading";
+
+            let th;
             headers.forEach(header => {
-                let th = document.createElement("th");
+                th = document.createElement("div");
+                th.className = "Cell";
                 th.innerHTML=header;
                 head.appendChild(th);
             });
+            document.getElementById("ticket-table").appendChild(head);
             var tickets = result.tickets;
             tickets.forEach(ticket => {
-                const tr = document.createElement("tr");
+                const tr = document.createElement("div");
+                tr.className = "Row";
+                    let td = document.createElement("div");
+                    td.className="Cell";
+                        let div = document.createElement("div");
+                        div.className="select";
+                            let select = document.createElement("select");
+                                select.name = "cuenta_destino"
 
-                    let td = document.createElement("td");
+                                result.cuentas.forEach((cuenta, i) =>{
+                                    let option = document.createElement("option");
+                                    option.text = cuenta.name;
+                                    option.value = cuenta.id;
+                                    if(ticket.cuenta){
+                                      if(ticket.cuenta.name == cuenta.name){
+                                          option.selected='selected';
+                                          }
+                                    }
+                                    select.add(option);
+                                });
+
+                                select.addEventListener('change', (event) => {
+                                      var tickets = getSelectedTickets();
+                                      if(tickets=='all'){
+                                        tickets = result.total_tickets;
+                                      }
+                                      else {
+                                        tickets.push(ticket.id);
+                                      }
+                                      editTickets('cuenta', event.target.value, tickets, event.target.parentNode.parentNode.parentNode);
+                                    });
+                        div.appendChild(select);
+                    td.appendChild(div);
+                tr.appendChild(td);
+
+
+                    td = document.createElement("div");
+                    td.className="Cell";
+                        div = document.createElement("div");
+                        div.className="select";
+                            select = document.createElement("select");
+                                select.name = "cuenta_destino"
+
+                                result.cuentas.forEach((cuenta, i) =>{
+                                    let option = document.createElement("option");
+                                    option.text = cuenta.name;
+                                    option.value = cuenta.id;
+                                    if(ticket.cuenta_destino){
+                                      if(ticket.cuenta_destino.name == cuenta.name){
+                                          option.selected='selected';
+                                          }
+                                    }
+                                    select.add(option);
+                                });
+                                option = document.createElement("option");
+                                option.text = "Asignar Cuenta Destino";
+                                option.value = "";
+                                option.disabled = true;
+                                if(ticket.cuenta_destino == null){
+                                  option.selected='selected';
+                                }
+                                select.add(option);
+
+                                select.addEventListener('change', (event) => {
+                                      var tickets = getSelectedTickets();
+                                      if(tickets=='all'){
+                                        tickets = result.total_tickets;
+                                      }
+                                      else {
+                                        tickets.push(ticket.id);
+                                      }
+                                      editTickets('cuenta_destino', event.target.value, tickets, event.target.parentNode.parentNode.parentNode);
+                                    });
+                        div.appendChild(select);
+                    td.appendChild(div);
+                tr.appendChild(td);
+
+
+                    td = document.createElement("div");
+                    td.className = "Cell";
                     input = document.createElement("input");
                     input.type="date";
                     input.className="input";
@@ -109,11 +229,12 @@ function handleTicketData(result) {
                     input.addEventListener('change', (event) => {
                       tickets = [];
                       tickets.push(ticket.id);
-                      editTickets('fecha', event.target.value, tickets);
+                      editTickets('fecha', event.target.value, tickets, event.target.parentNode.parentNode);
                     });
                     td.appendChild(input);
                 tr.appendChild(td);
-                    td = document.createElement("td");
+                    td = document.createElement("div");
+                    td.className = "Cell";
                     input = document.createElement("textarea");
                     input.className="input";
                     input.setAttribute("wrap", "soft");
@@ -123,26 +244,35 @@ function handleTicketData(result) {
                     input.addEventListener('change', (event) => {
                           var tickets = [];
                           tickets.push(ticket.id);
-                          editTickets('concepto', event.target.value.replace(/\n/g, ''), tickets);
+                          editTickets('concepto', event.target.value.replace(/\n/g, ''), tickets, event.target.parentNode.parentNode);
                         });
                     td.appendChild(input);
                 tr.appendChild(td);
-                    td = document.createElement("td");
+
+
+                    td = document.createElement("div");
+                    td.className = "Cell";
                     td.innerHTML=ticket.importe;
                 tr.appendChild(td);
 
-                    td = document.createElement("td");
+
+                    td = document.createElement("div");
+                    td.className = "Cell";
                     td.innerHTML=ticket.saldo;
                 tr.appendChild(td);
 
-                    td = document.createElement("td");
+
+                    td = document.createElement("div");
+                    td.className = "Cell";
                     td.innerHTML=ticket.moneda.key;
                 tr.appendChild(td);
 
-                    td = document.createElement("td");
-                        let div = document.createElement("div");
+
+                    td = document.createElement("div");
+                    td.className = "Cell";
+                        div = document.createElement("div");
                         div.className="select";
-                            let select = document.createElement("select");
+                            select = document.createElement("select");
                                 select.name = "categoria"
 
                                 result.categorias.forEach((categoria, i) =>{
@@ -157,15 +287,21 @@ function handleTicketData(result) {
 
                                 select.addEventListener('change', (event) => {
                                       var tickets = getSelectedTickets();
-                                      tickets.push(ticket.id);
-
-                                      editTickets('categoria', event.target.value, tickets);
+                                      if(tickets=='all'){
+                                        tickets = result.total_tickets;
+                                      }
+                                      else {
+                                        tickets.push(ticket.id);
+                                      }
+                                      editTickets('categoria', event.target.value, tickets, event.target.parentNode.parentNode.parentNode);
                                     });
                         div.appendChild(select);
                     td.appendChild(div);
                 tr.appendChild(td);
 
-                    td = document.createElement("td");
+
+                    td = document.createElement("div");
+                    td.className="Cell";
                         div = document.createElement("div");
                         div.className="select";
                             select = document.createElement("select");
@@ -199,13 +335,15 @@ function handleTicketData(result) {
                                       else {
                                         tickets.push(ticket.id);
                                       }
-                                      editTickets('proyecto', event.target.value, tickets);
+                                      editTickets('proyecto', event.target.value, tickets, event.target.parentNode.parentNode.parentNode);
                                     });
                         div.appendChild(select);
                     td.appendChild(div);
                 tr.appendChild(td);
 
-                    td = document.createElement("td");
+
+                    td = document.createElement("div");
+                    td.className="Cell";
                         span = document.createElement("span");
                         span.className="icon has-text-danger is-large";
 
@@ -237,7 +375,9 @@ function handleTicketData(result) {
                     td.appendChild(span);
                 tr.appendChild(td);
 
-                    td = document.createElement("td");
+
+                    td = document.createElement("div");
+                    td.className="Cell";
                         label = document.createElement("label");
                         label.className="checkbox";
                             input = document.createElement("input");
@@ -248,7 +388,7 @@ function handleTicketData(result) {
                         label.appendChild(input);
                     td.appendChild(label);
                 tr.appendChild(td);
-                document.getElementById("ticket-table-data").appendChild(tr);
+                document.getElementById("ticket-table").appendChild(tr);
             });
 
 

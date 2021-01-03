@@ -3,19 +3,16 @@
 {%load plotly_dash%}
 {% block content %}
 
-
-<div class="container">
   <h1 class="title"> {{categoria.name}} </h1>
   {% include 'tabs.html' %}
     <div id="tabs-container">
-      <div id="dash" class="container">
+      <div id="dash" class="container" style="display:none">
           {%plotly_app name="BalanceHistorial" ratio=1%}
       </div>
-      <div id="table" style="display:none">
+      <div id="table">
         {% include 'reports/tickets_table.html' %}
       </div>
     </div>
-</div>
-{% include 'reports/get_tickets.html' %}  
+{% include 'reports/get_tickets.html' %}
 
 {% endblock %}

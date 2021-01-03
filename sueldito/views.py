@@ -19,5 +19,13 @@ def get_base_context():
     c['cuentas'] = CuentaSerializer(Cuenta.objects.all().order_by('name'), many=True).data
     c['categorias'] = CategoriaSerializer(Categoria.objects.all().order_by('name'), many=True).data
     c['proyectos'] = ProyectoSerializer(Proyecto.objects.all().order_by('name'), many=True).data
-
+    c['headers'] = [('fecha', 'Fecha'),
+                    ('importe', 'Importe'),
+                    ('cuenta__name', 'Cuenta'),
+                    ('moneda__key', 'Moneda'),
+                    ('cuenta_destino', 'Cuenta Destino'),
+                    ('saldo', 'Saldo'),
+                    ('categoria__name', 'Categoria'),
+                    ('proyecto__name', 'Proyecto'),
+                    ]
     return c

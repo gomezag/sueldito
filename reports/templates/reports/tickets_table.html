@@ -1,10 +1,8 @@
 {% block ticket-table %}
-
+{% include 'reports/div-table.css' %}
 <div class="field is-grouped">
-  <div class="container">
     <label class="label" for="filter">Buscar: </label>
     <input type="text" id ="word-filter" name="filter" />
-    </div>
 </div>
 <script>
   document.getElementById("word-filter").addEventListener("change", (event) => {
@@ -45,7 +43,8 @@
     });
   </script>
 </div>
-<nav class="pagination is-small is-centered" role="navigation" aria-label="pagination">
+<div class="content" width="100%">
+    <nav class="pagination is-small is-centered" role="navigation" aria-label="pagination">
 <!--          <a class="pagination-previous" onclick="prevPage();">Previous</a>-->
     <ul id="page-list" class="pagination-list">
 
@@ -54,15 +53,10 @@
     <a class="pagination-next" id="prev-page-btn" onclick="nextPage();">Next page</a>
 <!--          <a class="pagination-next" onclick="nextPage();">Next page</a>-->
 </nav>
-<div class="table-container">
-<table class="table is-striped is-narrow" id="ticket-table" style="display:none;">
-    <thead id="ticket-table-head">
+<div class="table-container" width="100%">
+<div class="table Table" id="ticket-table" style="display:none;">
 
-    </thead>
-    <tbody id="ticket-table-data">
-
-    </tbody>
-</table>
+</div>
 </div>
 <div class="container is-centered" style="width:100%;text-align: center;">
 <div class="loader" display="none" id="table-loader"></div>
@@ -85,4 +79,5 @@
 
     </tbody>
 </table>
+</div>
 {% endblock %}

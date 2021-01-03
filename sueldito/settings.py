@@ -46,10 +46,10 @@ INSTALLED_APPS = [
 
     'macros',
     'bulma',
-
-    'contable',
-    'import',
     'reports',
+    'import',
+    'django_filters',
+    'contable',
 
     'colorfield',
     'django_plotly_dash.apps.DjangoPlotlyDashConfig',
@@ -156,7 +156,7 @@ USE_TZ = True
 STATICFILES_DIRS = [
 ]
 STATIC_ROOT='static/'
-STATIC_URL = 'https://static.agustingomez.me/sueldito/'
+STATIC_URL = '/sueldito/'
 
 # config/settings.py
 LOGIN_REDIRECT_URL = 'home'
@@ -165,3 +165,6 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

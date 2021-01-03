@@ -26,10 +26,11 @@ def home(request):
 @login_required(login_url='/accounts/login')
 def categorias(request):
     if request.method == 'POST':
-        categoria = Categoria()
-        categoria.name = request.POST['name']
-        categoria.key = request.POST['key']
-        categoria.save()
+        f = CategoriaForm(request.POST)
+        if f.is_valid():
+            f.save()
+        else:
+            return render(request, 'error.html', dict(error='bad form'))
 
     elif request.method == "PUT":
         if request.PUT.get("cat_id") and request.PUT.get("new_name"):
@@ -41,6 +42,7 @@ def categorias(request):
     c['cuentas'] = CuentaSerializer(Cuenta.objects.all(), many=True).data
     c['categorias'] = CategoriaSerializer(Categoria.objects.all(), many=True).data
     c['proyectos'] = ProyectoSerializer(Proyecto.objects.all(), many=True).data
+    c['form'] = CategoriaForm()
     return render(request, 'contable/categorias.html', c)
 
 
@@ -55,12 +57,11 @@ def cuentas(request, cuenta_id=None):
         session['django_plotly_dash'] = bargraph_state
 
         if request.method == 'POST':
-            cuenta = Cuenta()
-            cuenta.name = request.POST['name']
-            cuenta.key = request.POST['key']
-            cuenta.save()
-        else:
-            form = CuentaForm()
+            f = CuentaForm(request.POST)
+            if f.is_valid():
+                f.save()
+
+        form = CuentaForm()
 
         c = dict(form=form)
         c = {**c, **get_base_context()}
@@ -116,4 +117,3 @@ def modos_transferencia(request):
     c['categorias'] = CategoriaSerializer(Categoria.objects.all(), many=True).data
     c['proyectos'] = ProyectoSerializer(Proyecto.objects.all(), many=True).data
     return render(request, 'contable/modos_transferencia.html', c)
-

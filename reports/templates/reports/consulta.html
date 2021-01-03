@@ -1,0 +1,8 @@
+{% extends 'navbar.html' %}
+{%load plotly_dash%}
+{% load mathfilters %}
+{% block content %}
+{% load humanize %}
+    {%plotly_app name="Consulta" ratio=1 %}
+
+{% endblock %}

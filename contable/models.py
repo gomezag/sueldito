@@ -70,12 +70,23 @@ class Ticket(models.Model):
     importe = models.FloatField('importe')
     moneda = models.ForeignKey(Moneda, on_delete=models.SET_NULL, null=True, blank=True)
     modo = models.ForeignKey(ModoTransferencia, on_delete=models.SET_NULL, null=True, blank=True)
+    TIPO_GASTOS = [('D', 'Discrecional'),
+                   ('V', 'Variable'),
+                   ('F', 'Fijo'),
+                   ('I', 'Inversion')]
+    gasto = models.CharField(max_length=1, choices=TIPO_GASTOS)
+    TIPO_TAX = [('IRPF', 'IRPF'),
+                ('IVA', 'IVA'),
+                ('DEDU', 'Deducible'),
+                (None, 'None')]
+    tax = models.CharField(max_length=4, choices=TIPO_TAX, null=True, blank=True)
     concepto = models.CharField(max_length=200)
     categoria = models.ForeignKey(Categoria, on_delete=models.SET(get_uncategorized),
-                                  null=False, blank=False)
+                                  null=False, blank=False, default=get_uncategorized)
     consistency = models.BooleanField(default=False)
     proyecto = models.ForeignKey(Proyecto, on_delete=models.SET(get_unassigned),
-                                 null=False, blank=False)
+                                 null=False, blank=False, default=get_unassigned)
+    cuenta_destino = models.ForeignKey(Cuenta, null=True, blank=True, default=None, on_delete=models.SET_NULL, related_name='CuentaDestino')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -136,3 +147,15 @@ def check_ticket_consistency_after_subticket_creation(sender, instance, created,
 
 post_save.connect(check_ticket_consistency_after_subticket_creation, sender=SubTicket)
 post_save.connect(create_subticket_on_ticket_creation, sender=Ticket)
+
+
+class Inversion(models.Model):
+    name = models.CharField(max_length=30)
+    key = models.CharField(max_length=8)
+    value = models.FloatField()
+    amount = models.FloatField()
+    moneda = models.ForeignKey(Moneda, on_delete=models.PROTECT)
+    compra = models.ForeignKey(Ticket, on_delete=models.PROTECT)
+
+    def __name__(self):
+        return self.key+' - '+self.amount+'('+self.value*self.amount+' '+self.moneda.key+')'

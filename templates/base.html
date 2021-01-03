@@ -12,11 +12,14 @@
 </head>
 <body>
   <main>
+    <div width="100%">
     {% block navbar %}
     {% endblock %}
-
+    </div>
+    <div width="95%">
       {% block content %}
       {% endblock %}
+    </div>
   </main>
   <style>
     .loader {

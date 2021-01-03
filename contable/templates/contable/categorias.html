@@ -32,17 +32,10 @@
         <h1 class="title">
         Nueva Categoría
         </h1>
-
+        {{ form.media }}
         <form action="/categorias" method="post">
             {% csrf_token %}
-            <div class="field">
-                <label class="label">Name: </label>
-                <input type="text" name="name" />
-            </div>
-            <div class="field">
-                <label class="label">Key: </label>
-                <input type="text" name="key" />
-            </div>
+            {{form.as_p}}
             <div class="field">
                <input type="submit" value="Submit" class="button">
             </div>

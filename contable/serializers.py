@@ -42,6 +42,8 @@ class TicketSerializer(serializers.ModelSerializer):
     categoria = CategoriaSerializer()
     saldo = serializers.SerializerMethodField()
     proyecto = ProyectoSerializer()
+    cuenta_destino = CuentaSerializer()
+    cuenta = CuentaSerializer()
 
     def get_saldo(self, obj):
         return "{:,.2f}".format(obj.saldo)

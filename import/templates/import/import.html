@@ -7,6 +7,9 @@
     Import Page!
     <form action="/import/parse_file" method="post" enctype="multipart/form-data">
     {% csrf_token %}
+        {{form.as_table}}
+<!---
+
         <div class="file">
           <label class="file-label">
             <input class="file-input" type="file" name="uploaded-file" id="file-input">
@@ -22,7 +25,6 @@
         </div>
 
         <p id="selected-file"></p>
-
         <div class="control">
             <label class="radio">
                 <input type="radio" name="type" value="bbvaes"/>
@@ -37,15 +39,15 @@
                 CSV
             </label>
         </div>
-
+-->
        <input type="submit" value="Submit" class="button">
     </form>
 </div>
 
 <script>
-document.getElementById('file-input').onchange = function () {
-  document.getElementById('selected-file').innerHTML='Selected file: ' + this.value;
-};
+<!--document.getElementById('file-input').onchange = function () {-->
+<!--  document.getElementById('selected-file').innerHTML='Selected file: ' + this.value;-->
+<!--};-->
 </script>
 
 {% endblock %}

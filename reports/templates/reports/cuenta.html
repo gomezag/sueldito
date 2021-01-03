@@ -1,21 +1,31 @@
 {% extends 'navbar.html' %}
-
+{% load humanize %}
 {%load plotly_dash%}
 {% block content %}
 
 
-<div class="container">
   <h1 class="title"> {{cuenta.name}} </h1>
   {% include 'tabs.html' %}
-  <div id="tabs-container">
-    <div id="dash" class="container">
-        {%plotly_app name="BalanceHistorial" ratio=1%}
-    </div>
-    <div id="table" style="display:none">
+    <div id="tabs-container">
+              <div id="table">
+
+<!--  <div class="container">-->
+<!--
+   <form method="get">-->
+<!--            {{ filter.form.as_p }}-->
+<!--            <input type="submit" />-->
+<!--        </form>-->
+<!--        {% for obj in filter.qs %}-->
+<!--            {{ obj.fecha }} - {{ obj.concepto }}  {{obj.importe|intcomma}} | {{ obj.moneda.key }}<br />-->
+<!--        {% endfor %}-->
       {% include 'reports/tickets_table.html' %}
     </div>
+    <div id="dash" class="container" style="display:none">
+        {%plotly_app name="BalanceHistorial" ratio=1%}
+    </div>
   </div>
-</div>
 
 {% include 'reports/get_tickets.html' %}
 {% endblock %}
+
+
