@@ -3,6 +3,7 @@ from django.shortcuts import render
 
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 
 from sueldito.views import get_base_context
 
@@ -11,6 +12,7 @@ from sueldito.views import get_base_context
 from .serializers import *
 from .forms import *
 
+from django.core.paginator import Paginator
 
 # Create your views here.
 @require_http_methods(["GET", "POST"])
@@ -67,6 +69,7 @@ def cuentas(request, cuenta_id=None):
         c = {**c, **get_base_context()}
         return render(request, 'contable/cuentas.html', c)
 
+
 @require_http_methods(["GET", "POST"])
 @login_required(login_url='/accounts/login')
 def proyectos(request):
@@ -78,7 +81,6 @@ def proyectos(request):
     else:
         form = ProyectoForm()
         c = dict(form=form)
-
 
     c['cuentas'] = CuentaSerializer(Cuenta.objects.all(), many=True).data
     c['categorias'] = CategoriaSerializer(Categoria.objects.all(), many=True).data
@@ -104,6 +106,7 @@ def monedas(request):
 
 
 @require_http_methods(["GET", "POST"])
+@login_required(login_url='/accounts/login')
 def modos_transferencia(request):
     if request.method == 'POST':
         modo_transferencia = ModoTransferencia()
@@ -117,3 +120,31 @@ def modos_transferencia(request):
     c['categorias'] = CategoriaSerializer(Categoria.objects.all(), many=True).data
     c['proyectos'] = ProyectoSerializer(Proyecto.objects.all(), many=True).data
     return render(request, 'contable/modos_transferencia.html', c)
+
+
+@require_http_methods(["GET", "POST", "PUT"])
+@login_required(login_url='accounts/login')
+def activos(request):
+    if request.method == "POST":
+        if 'id' in request.POST.keys():
+            activo = Activo.objects.get(id=request.POST['id'])
+            form = ActivoForm(request.POST, instance=activo)
+        else:
+            form = ActivoForm(request.POST)
+            if form.is_valid():
+                activo = Activo(**form.cleaned_data)
+        if form.is_valid():
+            #print(activo.name, activo.id)
+            activo.save()
+    c = get_base_context()
+    if 'form_id' in request.GET.keys():
+        activo = ActivoSerializer(Activo.objects.get(id=request.GET['form_id'])).data
+        cform = ActivoForm(initial=activo)
+        c['form'] = cform
+        c['id'] = activo['id']
+        return render(request, 'contable/activoform.html', c)
+    else:
+        c['form'] = ActivoForm()
+        c['activos'] = ActivoSerializer(Activo.objects.all(), many=True).data
+        return render(request, 'contable/activos.html', c)
+

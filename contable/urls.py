@@ -8,4 +8,5 @@ urlpatterns = [
     path('modos_transferencia', modos_transferencia, name='modos_transferencia'),
     path('categorias', categorias, name='categorias'),
     path('proyectos', proyectos, name='proyectos'),
+    path('activos', activos, name='activos'),
 ]

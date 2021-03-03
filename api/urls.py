@@ -13,4 +13,5 @@ urlpatterns = [
     path('delete_proyecto', delete_proyecto),
     path('delete_cuenta', delete_cuenta),
     path('ticket', ticket),
+    path('tickets', tickets),
 ]

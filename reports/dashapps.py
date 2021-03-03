@@ -179,8 +179,8 @@ def update_graph(start_date, end_date, sel_cuenta, graph_type, sel_cat, sel_proy
                     ,  len(cats)+1, len(cats)+2
                         ],
                 value=[*[-t.importe*t.moneda.cambio for t in exp_tickets], *[t.importe*t.moneda.cambio for t in inc_tickets],  inc_net, exp_net],
-                customdata=[*["{}: {:,.2f} {}".format(t.concepto, t.importe, t.moneda) for t in inc_tickets],
-                            *["{}: {:,.2f} {}".format(t.concepto, t.importe, t.moneda) for t in exp_tickets],
+                customdata=[*["{}: {:,.2f} {}".format(t.concepto, t.importe, t.moneda) for t in exp_tickets],
+                            *["{}: {:,.2f} {}".format(t.concepto, t.importe, t.moneda) for t in inc_tickets],
                 ],
                 hovertemplate='%{customdata}',
                 line=dict(color="black", width=0.1)

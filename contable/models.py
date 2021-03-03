@@ -64,6 +64,29 @@ def get_uncategorized():
 def get_unassigned():
     return Proyecto.objects.get(name="No asignado")
 
+
+class Activo(models.Model):
+    name = models.CharField(max_length=30)
+    key = models.CharField(max_length=8)
+    unitvalue = models.FloatField()
+    amount = models.FloatField()
+    moneda = models.ForeignKey(Moneda, on_delete=models.PROTECT)
+    ESTADOS = [('S', 'Sold'),
+               ('A', 'Active')]
+    estado = models.CharField(max_length=1, choices=ESTADOS, default='A')
+
+    def __name__(self):
+        return self.key+' - '+self.amount+'('+self.value*self.amount+' '+self.moneda.key+')'
+
+    @property
+    def valor(self):
+        return self.unitvalue*self.amount*self.moneda.cambio
+
+    @property
+    def ganancias(self):
+        return sum([a.importe*a.moneda.cambio for a in self.ticket_set.all()])
+
+
 class Ticket(models.Model):
     fecha = models.DateField('Fecha')
     cuenta = models.ForeignKey(Cuenta, on_delete=models.CASCADE)
@@ -87,6 +110,7 @@ class Ticket(models.Model):
     proyecto = models.ForeignKey(Proyecto, on_delete=models.SET(get_unassigned),
                                  null=False, blank=False, default=get_unassigned)
     cuenta_destino = models.ForeignKey(Cuenta, null=True, blank=True, default=None, on_delete=models.SET_NULL, related_name='CuentaDestino')
+    activo = models.ForeignKey(Activo, null=True, blank=True, default=None, on_delete=models.SET_NULL)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -147,15 +171,3 @@ def check_ticket_consistency_after_subticket_creation(sender, instance, created,
 
 post_save.connect(check_ticket_consistency_after_subticket_creation, sender=SubTicket)
 post_save.connect(create_subticket_on_ticket_creation, sender=Ticket)
-
-
-class Inversion(models.Model):
-    name = models.CharField(max_length=30)
-    key = models.CharField(max_length=8)
-    value = models.FloatField()
-    amount = models.FloatField()
-    moneda = models.ForeignKey(Moneda, on_delete=models.PROTECT)
-    compra = models.ForeignKey(Ticket, on_delete=models.PROTECT)
-
-    def __name__(self):
-        return self.key+' - '+self.amount+'('+self.value*self.amount+' '+self.moneda.key+')'

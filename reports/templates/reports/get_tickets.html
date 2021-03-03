@@ -35,7 +35,20 @@ function selectAll(state){
 
 function getTicketPage(page) {
     let keyword = document.getElementById("word-filter").value;
-    $.getJSON("tickets?page="+page+"&keyword="+keyword, function(data) {
+
+    let url = "tickets?";
+    let getvars = {
+        page: page,
+        keyword: keyword,
+        };
+    Object.keys(getvars).map(function(k){
+        url += k;
+        url += '=';
+        url += getvars[k];
+        url += '&';
+        });
+    url = url.slice(0,-1);
+    $.getJSON(url, function(data) {
                         $("#page-list").empty();
                         $("#page-list2").empty();
                         handleTicketData(data);
@@ -82,6 +95,15 @@ function populateTable(result){
         });
         document.getElementById("ticket-table").appendChild(tr);
     });
+
+    var pages=result.pages;
+    document.getElementById("goto").value=result.page_number;
+    document.getElementById("goto").max=pages.length;
+    document.getElementById("goto-max-label").innerHTML='/'+pages.length;
+    $("#page-list").empty();
+    $("#page-list2").empty()
+    createPaginationLinks(pages, document.getElementById("page-list"));
+    createPaginationLinks(pages, document.getElementById("page-list2"));
 }
 
 function getSubTickets(ticket_id){
@@ -128,7 +150,7 @@ function handleTicketData(result) {
 
             document.getElementById("select-all-all-total").innerHTML=result.total_tickets.length;
 
-            var headers = ["Cuenta","Cuenta Destino", "Fecha", "Concepto", "Importe", "Saldo", "Moneda", "Categoria","Proyecto", "Borrar", "Seleccionar"];
+            var headers = ["Cuenta","Cuenta Destino", "Fecha", "Concepto", "Importe", "Saldo", "Moneda", "Categoria","Proyecto","Activo", "Borrar", "Seleccionar"];
             head = document.createElement("div");
             head.className="Heading";
 
@@ -156,7 +178,7 @@ function handleTicketData(result) {
                                     option.text = cuenta.name;
                                     option.value = cuenta.id;
                                     if(ticket.cuenta){
-                                      if(ticket.cuenta.name == cuenta.name){
+                                      if(ticket.cuenta == cuenta.name){
                                           option.selected='selected';
                                           }
                                     }
@@ -190,16 +212,16 @@ function handleTicketData(result) {
                                     option.text = cuenta.name;
                                     option.value = cuenta.id;
                                     if(ticket.cuenta_destino){
-                                      if(ticket.cuenta_destino.name == cuenta.name){
+                                      if(ticket.cuenta_destino == cuenta.name){
                                           option.selected='selected';
                                           }
                                     }
                                     select.add(option);
                                 });
                                 option = document.createElement("option");
-                                option.text = "Asignar Cuenta Destino";
+                                option.text = "Asignar";
                                 option.value = "";
-                                option.disabled = true;
+                                option.disabled = false;
                                 if(ticket.cuenta_destino == null){
                                   option.selected='selected';
                                 }
@@ -264,7 +286,7 @@ function handleTicketData(result) {
 
                     td = document.createElement("div");
                     td.className = "Cell";
-                    td.innerHTML=ticket.moneda.key;
+                    td.innerHTML=ticket.moneda;
                 tr.appendChild(td);
 
 
@@ -279,7 +301,7 @@ function handleTicketData(result) {
                                     let option = document.createElement("option");
                                     option.text = categoria.name;
                                     option.value = categoria.id;
-                                    if(ticket.categoria.name == categoria.name){
+                                    if(ticket.categoria == categoria.name){
                                         option.selected='selected';
                                         }
                                     select.add(option);
@@ -312,14 +334,14 @@ function handleTicketData(result) {
                                     option.text = proyecto.name;
                                     option.value = proyecto.id;
                                     if(ticket.proyecto){
-                                      if(ticket.proyecto.name == proyecto.name){
+                                      if(ticket.proyecto == proyecto.name){
                                           option.selected='selected';
                                           }
                                     }
                                     select.add(option);
                                 });
                                 option = document.createElement("option");
-                                option.text = "Asignar Proyecto";
+                                option.text = "Asignar";
                                 option.value = "";
                                 option.disabled = true;
                                 if(ticket.proyecto == null){
@@ -341,6 +363,46 @@ function handleTicketData(result) {
                     td.appendChild(div);
                 tr.appendChild(td);
 
+                    td = document.createElement("div");
+                    td.className="Cell";
+                        div = document.createElement("div");
+                        div.className="select";
+                            select = document.createElement("select");
+                                select.name = "activo"
+
+                                result.activos.forEach((activo, i) =>{
+                                    let option = document.createElement("option");
+                                    option.text = activo.name;
+                                    option.value = activo.id;
+                                    if(ticket.activo){
+                                      if(ticket.activo == activo.name){
+                                          option.selected='selected';
+                                          }
+                                    }
+                                    select.add(option);
+                                });
+                                option = document.createElement("option");
+                                option.text = "Asignar";
+                                option.value = "";
+                                option.disabled = true;
+                                if(ticket.activo == null){
+                                  option.selected='selected';
+                                }
+                                select.add(option);
+
+                                select.addEventListener('change', (event) => {
+                                      var tickets = getSelectedTickets();
+                                      if(tickets=='all'){
+                                        tickets = result.total_tickets;
+                                      }
+                                      else {
+                                        tickets.push(ticket.id);
+                                      }
+                                      editTickets('activo', event.target.value, tickets, event.target.parentNode.parentNode.parentNode);
+                                    });
+                        div.appendChild(select);
+                    td.appendChild(div);
+                tr.appendChild(td);
 
                     td = document.createElement("div");
                     td.className="Cell";
@@ -390,7 +452,6 @@ function handleTicketData(result) {
                 tr.appendChild(td);
                 document.getElementById("ticket-table").appendChild(tr);
             });
-
 
             var pages=result.pages;
             document.getElementById("goto").value=result.page_number;

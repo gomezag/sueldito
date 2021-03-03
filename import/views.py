@@ -36,16 +36,13 @@ def parse_file(request):
     file_data = file.read()
     print(request.POST['type'])
     if request.POST['type'] == 'bbvaes':
-        df = pandas.read_excel(file_data)
-        df = df.iloc[3:, 1:]
-        df = df.rename(columns=df.iloc[0])
+        df = pandas.read_excel(file_data, usecols="B:J", skiprows=range(1,4), header=1)
         df = df.loc[:, ~df.columns.duplicated()]
         df = df.iloc[pandas.RangeIndex(len(df)).drop(0)]
         df = df.reset_index()
-
+        df = df.dropna(subset=['Fecha'])
         modos = []
 
-        print(df.columns)
         if 'Movimiento' in df.columns:
             for i in range(len(df)):
                 if 'Transferencia' in df['Concepto'][i]:
@@ -127,7 +124,6 @@ def import_file(request):
 
     for i in range(0, len(df)):
         ticket = Ticket()
-        print(df['Concepto'])
         ticket.concepto = df[request.POST['concepto']][i]
         importe = df[request.POST['importe']][i]
         if type(importe) == str:

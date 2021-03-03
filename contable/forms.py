@@ -9,7 +9,6 @@ class UploadFileForm(forms.Form):
 
 
 class CuentaForm(forms.ModelForm):
-
     moneda = forms.ModelChoiceField(queryset=Moneda.objects.all())
     class Meta:
         model = Cuenta
@@ -39,3 +38,16 @@ class ProyectoForm(forms.ModelForm):
         model = Proyecto
         fields = ['name']
 
+
+class ActivoForm(forms.ModelForm):
+    moneda = forms.ModelChoiceField(queryset=Moneda.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        super(ActivoForm, self).__init__(*args, **kwargs)
+        print(self.initial)
+        if self.initial and isinstance(self.initial['moneda'], dict):
+            self.initial['moneda'] = self.initial['moneda']['id']
+
+    class Meta:
+        model = Activo
+        fields = '__all__'

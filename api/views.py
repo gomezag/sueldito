@@ -39,10 +39,18 @@ def edit_ticket(request):
                 ticket = Ticket.objects.get(id=ticket)
                 ticket.proyecto = Proyecto.objects.get(id=put['value'])
                 ticket.save()
+        if put['attribute'] == 'activo':
+            for ticket in tickets:
+                ticket = Ticket.objects.get(id=ticket)
+                ticket.activo = Activo.objects.get(id=put['value'])
+                ticket.save()
         if put['attribute'] == 'cuenta_destino':
             for ticket in tickets:
                 ticket = Ticket.objects.get(id=ticket)
-                ticket.cuenta_destino = Cuenta.objects.get(id=put['value'])
+                if put['value']!='':
+                    ticket.cuenta_destino = Cuenta.objects.get(id=put['value'])
+                else:
+                    ticket.cuenta_destino = None
                 ticket.save()
         return HttpResponse(status='200')
 
@@ -153,4 +161,55 @@ def ticket(request):
             return render(request, 'error.html', context=dict(error=repr(e)))
     else:
         return render(request, 'ticket.html', context=dict(form=TicketForm()))
+
+
+@require_http_methods(["GET", "POST"])
+@login_required(login_url='accounts/login')
+def tickets(request, cuenta_id=None, categoria_id=None, proyecto_id=None, fechas=None):
+    print('hey')
+    tickets = Ticket.objects.all().order_by('-fecha')
+    if cuenta_id:
+        cuenta = Cuenta.objects.get(id=cuenta_id)
+        tickets = tickets.filter(cuenta=cuenta)
+    if categoria_id:
+        categoria = Categoria.objects.get(id=categoria_id)
+        tickets = tickets.filter(categoria=categoria)
+    if proyecto_id:
+        proyecto = Proyecto.objects.get(id=proyecto_id)
+        tickets = tickets.filter(proyecto=proyecto)
+    if request.GET.get('keyword'):
+        keyword = request.GET.get('keyword')
+        tickets = tickets.filter(concepto__icontains=keyword)
+    if request.GET.get('categoria'):
+        categoria = Categoria.objects.get(id=request.GET.get('categoria'))
+        tickets = tickets.filter(categoria=categoria)
+    if fechas:
+        tickets = tickets.filter(fecha__gte=fechas[0], fecha__lte=fechas[1])
+    total_tickets = [ticket.id for ticket in tickets]
+    paginator = Paginator(tickets, 30)
+    page_number = request.GET.get('page')
+    tickets = paginator.get_page(page_number)
+    jtickets = ReadOnlyTicketSerializer(tickets, many=True).data
+
+    c = dict(
+        tickets=jtickets,
+        total_tickets=total_tickets,
+        pages=list(range(1, paginator.num_pages+1)),
+        page_number=page_number,
+    )
+    c['headers'] = [('fecha', 'Fecha'),
+                    ('cuenta', 'Cuenta'),
+                    ('concepto', 'Concepto'),
+                    ('importe', 'Importe'),
+                    ('moneda', 'Moneda'),
+                    ('cuenta_destino', 'Cuenta Destino'),
+                    ('categoria', 'Categoria'),
+                    ('proyecto', 'Proyecto'),
+                    ('activo', 'Activo'),
+                    ('saldo', 'Saldo'),
+                    ]
+
+    c = {**c, **get_base_context()}
+
+    return JsonResponse(c)
 

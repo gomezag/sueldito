@@ -1,0 +1,119 @@
+{% extends 'navbar.html' %}
+{%load plotly_dash%}
+{% load mathfilters %}
+{% block content %}
+{% load humanize %}
+
+
+<div class="container">
+    <h1 class="title"> Activos </h1>
+    <div class="content">
+    {% for activo in activos %}
+        <div class="card">
+            <div class="media-content">
+                <p class="title is-4"><a  href="view/activo/{{activo.id}}">{{activo.name}}</a>
+                <span class="icon" onclick="editActivo('{{activo.id}}', '{{activo.name}}');">
+                    <icon class="fa fa-edit"></icon>
+                </span>
+                <span class="icon" onclick="deleteActivo('{{activo.id}}');">
+                    <icon class="fa fa-trash"></icon>
+                </span>
+                </p>
+            </div>
+            <div class="content">
+                {% with numerator=activo.valor %}
+                    Saldo: {{ numerator|floatformat:2|intcomma }} EUR
+                {% endwith %}
+
+                {% with numerator=activo.ganancias %}
+                    Ganancias: {{ numerator|floatformat:2|intcomma }} EUR
+                {% endwith %}
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+    <!--- {%plotly_app name="BalanceHistorial" ratio=1 %} --->
+
+</div>
+
+
+<div class="modal" id="edit-modal">
+    <div class="modal-background">
+
+    </div>
+    <div class="modal-card">
+        <form name="editForm" method="POST" action="/activos">
+        {% csrf_token %}
+            <header class="modal-card-head">
+              <p class="modal-card-title">Editar Activo</p>
+              <button class="delete" aria-label="close" onclick="document.getElementById('edit-modal').className='modal';"></button>
+            </header>
+            <section class="modal-card-body" id="form-body">
+
+            </section>
+            <footer class="modal-card-foot">
+              <input type="submit" value="Editar Activo">
+            </footer>
+        </form>
+    </div>
+</div>
+
+
+<div class="container">
+
+    <form action="/activos" method="post">
+        {% csrf_token %}
+        <table>
+        {{ form.as_table }}
+        </table>
+        <input type="submit" value="Crear Activo">
+    </form>
+</div>
+
+<script>
+function deleteActivo(id) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+      if (xhr.readyState===4){
+          if(xhr.status === 200) {
+              location.reload();
+          }
+          else{
+              console.log(xhr.status);
+          }
+      }
+      else{
+          console.log("sending");
+      }
+  };
+  csrftoken = getCookie('csrftoken');
+  xhr.open('DELETE', '/api/activo');
+  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+  data = {activo_id:id};
+  xhr.send(JSON.stringify(data));
+}
+
+function editActivo(id, name) {
+    document.getElementById("edit-modal").className="modal is-active";
+    let xhr = new XMLHttpRequest();
+    let url = '/activos?form_id='+id;
+    console.log(url);
+    xhr.open('GET', url);
+    xhr.onreadystatechange = function() {
+          if (xhr.readyState===4){
+              if(xhr.status === 200) {
+                document.getElementById("form-body").innerHTML = xhr.response;
+              }
+              else{
+                console.log(xhr.status);
+              }
+          }
+          else{
+              console.log("sending");
+          }
+     };
+     xhr.send();
+    }
+
+</script>
+{% endblock %}
